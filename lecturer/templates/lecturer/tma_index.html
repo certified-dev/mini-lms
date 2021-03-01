@@ -1,0 +1,64 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static %}
+
+{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+
+{% block js %}<script src="{% static 'assets/js/tma.js' %}"></script>{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item active">Tutor Marked Assessment</li>
+    </ol>
+  </nav>
+  
+ {% if lecturer_courses > 0 %}
+ <!-- TMA-MODAL-->
+<div class="modal fade" id="modal-tma">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+        </div>
+    </div>
+</div>
+<!-- END-->
+
+ <div class="mb-3">
+   <button type="button" class="btn btn-primary js-create-tma" data-url="{% url 'lecturer:tma_create' %}"><i class="fas fa-plus" style="color:white;"></i> Add TMA</button>
+</div>
+    
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        <div class="card">
+            <div class="card-header text-center"> <strong>ADDED TMA</strong></div>
+            <div class="table-responsive">
+            <table class="table table-hover mb-0" id="tma-table">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Questions</th>
+                        <th>Taken</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% include 'lecturer/includes/partial_tma_list.html' %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+ {% else %}
+
+<div class="text-center middle-banner"><h1><span class="fas fa-user-graduate"></span> STUDY<b>WARE</b></h1></div>
+
+{% endif %}
+
+ {{ lecturer_courses|json_script:"lecturer_courses" }}  
+
+{% endblock %}

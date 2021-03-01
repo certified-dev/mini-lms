@@ -1,0 +1,48 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static crispy_forms_tags %}
+
+{% block head_title %} Photo | StudyWare {% endblock %}
+
+{% block content %}
+<style>
+    .img2 {
+    width:200px;
+    height:200px;
+    }
+</style>
+
+<div class="modal fade" id="modelId" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+			<div class="card">
+				<a href="{% url 'lecturer:dashboard' %}" class="close"  aria-label="Close">
+					<button class="btn btn-outline-danger rounded-pill mt-2 ml-2"><i class="fas fa-arrow-left"></i></button></a>
+  <div class="card-body">
+	  <form enctype="multipart/form-data" method="post" novalidate>
+		  {% csrf_token %}
+		  <div class="text-center">
+			  <div class="preview">
+			  <img id="img_prev" src="{{ user.photo.url }}" alt="" class="img-thumbnail border-0 img2">
+		  </div>
+			  <div class="form-group">
+                <input type="file" class="form-control" accept="image/*" name="photo" id="id_photo" onchange="showBtn(event)">
+                <small id="helpId" class="form-text text-muted">Help text</small>
+              </div>
+		  <button id="sub" class="btn btn-success rounded-pill" type="submit" style="display:none;"><span class="fa fa-upload"></span> Upload</button>
+        </div>
+	  </form>
+  </div>
+</div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center" style="margin-top: 25%;"><h1 class=""><span class="fas fa-spinner" style="color: dodgerblue"></span> PAGE LOADING.....</h1></div>
+
+<script type="text/javascript">
+  function showBtn(event){
+      document.getElementById('sub').style.display = "inline";
+  }
+</script>
+{% endblock %}

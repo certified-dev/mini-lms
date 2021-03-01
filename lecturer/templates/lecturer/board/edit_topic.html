@@ -1,0 +1,57 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static crispy_forms_tags %}
+
+{% block head_title %} Topic | StudyWare {% endblock %}
+
+{% block content %}
+ <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+    <li class="breadcrumb-item">Board</li>
+      <li class="breadcrumb-item active"><a href="{% url 'lecturer:topic_list' %}">Topics</a></li>
+        {% if 'edit' in request.path %}
+      <li class="breadcrumb-item active">Edit</li>
+        {% else %}
+      <li class="breadcrumb-item active">New topic</li>
+        {% endif %}
+    </ol>
+  </nav>
+<div class="mb-3">
+<form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {{ form.media }}
+      <div class="form-group col-md-11 mb-0 ml-0">
+        {{ form.subject|as_crispy_field }}
+      </div>
+      
+       <div class="form-group col-md-11 mb-0 ml-0">
+      {{ form.message|as_crispy_field }}
+    </div>
+
+    {% if 'edit' in request.path %}
+     <div class="form-group col-md-6 mb-0">
+       {{ form.files|as_crispy_field }}
+     </div>
+    {% else %}
+    <div class="form-row pl-2 pr-2">
+      <div class="form-group col-md-4 mb-0">
+        {{ form.course|as_crispy_field }}
+      </div>
+      <div class="form-group col-md-7 mb-0">
+        {{ form.files|as_crispy_field }}
+      </div>
+    </div>
+    {% endif %}
+
+    
+    {% if 'edit' in request.path %}
+      <button type="submit" class="btn btn-success">Save changes</button>
+    {% else %}
+    <button type="submit" class="btn btn-success">Post</button>
+    {% endif %}
+    
+    <a href="{% url 'lecturer:topic_list' %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+  </form>
+  </div>
+
+{% endblock %}

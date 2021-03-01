@@ -1,0 +1,62 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static crispy_forms_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.core.css' %}">
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.css' %}">
+<style>
+  .mathfield {
+     border: 1px solid #ddd;
+     padding:10px;
+     margin: 5px 0 20px 0;
+     border-radius:5px;
+     background-color: #fff;
+    }
+  label {
+    display:none;
+  }
+</style>
+{% endblock %}
+
+{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+
+
+{% block content %}
+ <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tutor Marked Assesment</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.title|upper }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Add Question</li>
+    </ol>
+  </nav>
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-3">Add a new question</h2>
+  <p class="lead"><i class="fas fa-exclamation-circle" style="color:dodgerblue"></i> Add first the text of the question. In the next step you will be able to add the possible answers.
+  </p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form|crispy }}
+      <p class="lead "><i class="fas fa-exclamation-circle" style="color:dodgerblue"></i> Use This Box For Math,Physics And Chemistry Equations</p>
+      <div class="mathfield" id='mf'></div>
+    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+    <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+  </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script  src="{% static 'assets/vendor/mathlive/mathlive.js' %}"></script>
+<script>
+    const mf = MathLive.makeMathField('mf', {
+    smartMode: true,
+    smartSuperscript: true,
+    virtualKeyboardMode: 'manual',
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static crispy_forms_tags crispy_forms_filters %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.core.css' %}">
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.css' %}">
+<style>
+.mathfield {
+  border: 1px solid #ddd;
+  padding:10px;
+  margin: 5px 0 20px 0;
+  border-radius:5px;
+  background-color: #fff;
+    }
+</style>
+{% endblock %}
+
+
+{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+
+
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tutor Marked Assesment</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.title|upper }}</a></li>
+        <li class="breadcrumb-item"><a href="#">Question</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ question.id }}</li>
+    </ol>
+  </nav>
+
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+        <div class="card">
+            <div class="card-header text-center">{{ tma.course.code }} - {{ tma.title|upper }}</div>
+            <div class="card-body">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ formset.management_form }}
+      <div class="mathfield" id='mf'></div>
+    {{ form|crispy }}
+
+
+    <div class="card mb-3{% if formset.errors %} border-danger{% endif %}">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-8">
+            <strong>Answers</strong>
+          </div>
+          <div class="col-2">
+            <strong>Correct?</strong>
+          </div>
+          <div class="col-2">
+            <strong>Delete?</strong>
+          </div>
+        </div>
+      </div>
+      {% for error in formset.non_form_errors %}
+        <div class="card-body bg-danger border-danger text-white py-2">{{ error }}</div>
+      {% endfor %}
+      <div class="list-group list-group-flush list-group-formset">
+          <div class="mathfield m-2" id='mf1' ></div>
+        {% for form in formset %}
+          <div class="list-group-item">
+            <div class="row">
+              <div class="col-8">
+                {% for hidden in form.hidden_fields %}{{ hidden }}
+                  {% endfor %}
+                {{ form.text|as_crispy_field }}
+                {% if form.instance.pk and form.text.value != form.instance.text %}
+                  <p class="mb-0 mt-1"><small class="text-muted font-italic"><strong>Old answer:</strong> {{ form.instance.text }}</small>
+                  </p>
+                  {% endif %}
+              </div>
+              <div class="col-2">
+                {{ form.is_correct }}
+              </div>
+              <div class="col-2">
+                {% if form.instance.pk %}
+                  {{ form.DELETE }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <p>
+      <small class="form-text text-muted">Your question may have at least <strong>4</strong> answers and maximum <strong>5</strong> answers. Select at least one correct answer.</small>
+    </p>
+    <button type="submit" class="btn btn-success">Save changes</button>
+    <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-secondary" role="button">Back</a>
+      <button type="button" class="btn btn-outline-danger question-delete ml-2 mr-2 float-right" data-url="{% url 'lecturer:question_delete' tma.pk question.pk %}" style="border-radius:50px;"><i class="fa fa-trash"></i></button>
+  </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'assets/vendor/jquery3/jquery.min.js' %}"></script>
+<script type="text/javascript">
+    $(".question-delete").click(function(){
+        var btn = $(this);
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      beforeSend: function () {
+        $("#modal-question .modal-content").html("");
+        $("#modal-question").modal("show");
+      },
+      success: function (data) {
+           $("#modal-question .modal-content").html(data.html_form);
+      }
+    });
+    });
+
+    
+</script>
+<!-- TMA-MODAL-->
+<div class="modal fade" id="modal-question">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+        </div>
+    </div>
+</div>
+<!-- END-->
+
+<script type="module">
+import MathLive from '{% static 'assets/vendor/mathlive/mathlive.mjs' %}';
+     const mf = MathLive.makeMathField( 'mf', {
+       smartMode: true,
+       virtualKeyboardMode: 'manual',
+       smartSuperscript: true,
+
+});
+ const mf1 = MathLive.makeMathField( 'mf1', {
+       smartMode: true,
+       virtualKeyboardMode: 'manual',
+       smartSuperscript: true,
+
+});
+</script>
+{% endblock %}
+
+

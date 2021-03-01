@@ -1,0 +1,49 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static humanize %}
+
+{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+
+{% block content %}
+ <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tutor Marked Assesment</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.title|upper }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Results</li>
+    </ol>
+  </nav>
+
+  <div class="card">
+    <div class="card-header">
+      Course: <strong>{{ tma.course.code }}</strong>
+      <span class="badge badge-pill badge-primary float-right">Average Score: {{ tma_score.average_score|default_if_none:0.0 }}</span>
+    </div>
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Student</th>
+          <th>Date</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for taken_tma in taken_tmas %}
+          <tr>
+            <td>{{ forloop.counter}}</td>
+            <td><img src="{{ taken_tma.student.user.photo.url}}" class="rounded-circle" width="25" height="25" alt=""> {{ taken_tma.student.user.username }}(<small><strong>{{ taken_tma.student.user.full_name}}</strong></small>)</td>
+            <td>{{ taken_tma.date|naturaltime }}</td>
+            <td>{{ taken_tma.score }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="card-footer text-muted">
+      Total respondents: <strong>{{ total_taken_tmas }}</strong>
+
+
+    </div>
+  </div>
+  {% include 'includes/pagination.html' %}
+  
+{% endblock %}

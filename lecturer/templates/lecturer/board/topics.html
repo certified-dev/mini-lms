@@ -1,0 +1,77 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static humanize widget_tweaks %}
+
+{% block head_title %} Board - Topics | StudyWare {% endblock %}
+
+
+{% block content %}
+ <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Board</li>
+      <li class="breadcrumb-item active">Topics</li>
+    </ol>
+  </nav>
+
+{% if lecturer_courses > 0 %}
+
+<div class="mb-4">
+    <a href="{% url 'lecturer:new_topic' %}" class="btn btn-primary">New topic</a>
+  </div>
+
+  <div class="card mb-2">
+    <div class="table-responsive">
+    <table class="table mb-0">
+      <thead class="thead-inverse">
+        <tr>
+          <th>Topic</th>
+          <th>Course</th>
+          <th>Replies</th>
+          <th>Views</th>
+          <th>Added</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for topic in topics %}
+        {% url 'lecturer:topic_posts' topic.pk as topic_url %}
+          <tr class="mb-0">
+            <td>
+              <p class="mb-0">
+                <a href="{{ topic_url }}">{{ topic.subject }}</a>
+              </p>
+              <small class="text-muted">
+                Pages:
+                {% for i in topic.get_page_range %}
+                  <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
+                {% endfor %}
+                {% if topic.has_many_pages %}
+                ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
+                {% endif %}
+              </small> 
+            </td>
+            <td class="align-middle">{{ topic.course }}</td>
+            <td class="align-middle">{{ topic.replies }}</td>
+            <td class="align-middle">{{ topic.views }}</td>
+            <td class="align-middle">{{ topic.added_on|naturaltime }}</td>
+          </tr>
+          {% empty %}
+              <tr>
+              <td class="bg-light text-center font-italic" colspan="7">No topic yet.</td>
+              </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    </div>
+  {% include 'includes/pagination.html' %}
+
+  {% else %}
+
+ <div class="text-center middle-banner"><h1><span class="fas fa-user-graduate"></span> STUDY<b>WARE</b></h1></div>
+
+ {% endif %}
+
+
+ {{ lecturer_courses|json_script:"lecturer_courses" }} 
+
+{% endblock %}

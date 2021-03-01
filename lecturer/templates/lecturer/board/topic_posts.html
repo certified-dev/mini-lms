@@ -1,0 +1,87 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static humanize %}
+
+{% block head_title %} Topic - Posts | StudyWare {% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb mt-4">
+    <li class="breadcrumb-item">Board</li>
+    <li class="breadcrumb-item "><a href="{% url 'lecturer:topic_list' %}">Topics</a></li>
+    <li class="breadcrumb-item active">{{ topic.subject|capfirst }}</li>
+  </ol>
+</nav>
+
+  <div class="card mb-3 laptop"  style="border-radius:0;">
+     <div class="card-title py-2 px-3 m-0"><strong>{{ topic.subject|capfirst }}</strong>  {% if topic.lecturer == user.lecturer %}
+      <small><a href="{% url 'lecturer:edit_topic' topic.pk %}" class="btn btn-primary btn-sm float-right">Edit</a></small>
+        {% endif %}
+     </div>
+      <div class="card-body pb-2 pt-1">
+          <p class="card-text"><div class="container p-0">{{ topic.message.html|safe }}</div></p>
+          <small class="text-muted float-right">{{ topic.added_on|naturaltime }}</small>
+      </div>
+    </div>
+
+    <div class="container p-2  border mobile mb-2">  
+      <div class="row">
+        <div class="col-12 pb-1">
+          <strong>{{ topic.subject|capfirst }}</strong>
+        </div>
+        <div class="col-12">
+          {{ topic.message.html|safe }}
+        </div>
+        <div class="col-12">
+          <small><a href="{% url 'lecturer:edit_topic' topic.pk %}" class="btn btn-primary btn-sm">Edit</a></small>
+          <small class="text-muted float-right pt-1">{{ topic.added_on|naturaltime }}</small>
+        </div>
+      </div>
+    </div>
+
+  {% for post in posts %}
+    <div class="card {% if forloop.last %}mb-4{% else %}mb-2{% endif %} laptop">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-1 text-center pl-2">
+            <img src="{{ post.created_by.photo.url }}" alt="{{ post.created_by.username }}" width="70" height="70" class="rounded-circle">
+          </div>
+          <div class="col-11">
+            <div class="row">
+              <div class="col-6">
+                <small><strong class="text-muted">{{ post.created_by.username }}</strong></small>
+              </div>
+              <div class="col-6 text-right">
+                <small class="text-muted">{{ post.created_at|naturaltime }}</small>
+              </div>
+            </div>
+            {{ post.message.html|safe }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container p-2 border-bottom mobile mb-2">  
+      <div class="row">
+        <div class="col-12">
+          {{ post.message.html|safe }}
+        </div>
+        <div class="col-12">
+          <img src="{{ post.created_by.photo.url }}" alt="{{ post.created_by.username }}" width="20" height="20" class="rounded-circle mr-1">
+          <small><strong class="text-muted">{{ post.created_by.username }}</strong></small>
+          <span class="float-right text-muted small">{{ post.created_at|naturaltime }}</span>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <div class="card">
+      <div class="card-body bg-light text-center font-italic">No comments yet.</div>
+    </div>
+   {% endfor %}
+
+   <div class="ml-3">
+     {% include 'includes/pagination.html' %}
+  </div>
+
+{% endblock %}

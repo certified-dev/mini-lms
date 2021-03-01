@@ -1,0 +1,71 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static crispy_forms_tags %}
+
+{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tutor Marked Assesment</a></li>
+      <li class="breadcrumb-item active">{{ tma.title|upper }}</li>
+        <li class="breadcrumb-item active">Questions</li>
+    </ol>
+  </nav>
+
+<div class="row">
+  <div class="col-md-12 col-lg-12">
+    <div class="card">
+    <div class="card-header">
+      <div class="row">
+          <div class="col-1">
+          <strong>S/N</strong>
+        </div>
+        <div class="col-7">
+          <strong>Questions</strong>
+        </div>
+          <div class="col-2">
+          <strong>Actions</strong>
+        </div>
+        <div class="col-2">
+          <strong>Answers</strong>
+        </div>
+      </div>
+    </div>
+    <div class="list-group list-group-flush list-group-formset">
+      {% for question in questions %}
+        <div class="list-group-item">
+          <div class="row">
+              <div class="col-1">
+              {{ forloop.counter}}
+            </div>
+            <div class="col-7">
+              <a href="{% url 'lecturer:question_change' tma.pk question.pk %}">{{ question.text }}</a>
+            </div>
+              <div class="col-2">
+           <a href="{% url 'lecturer:question_change' tma.pk question.pk %}" class="btn btn-sm btn-outline-primary" style="border-radius:50px;"><span class="fas fa-pen-alt"></span></a>
+         </div>
+            <div class="col-2">
+              {{ question.answers_count }}
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="list-group-item text-center">
+          <p class="text-muted font-italic mb-0">You haven't created any questions yet. Go ahead and <a href="{% url 'lecturer:question_add' tma.pk %}">add the first question</a>.</p>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'lecturer:question_add' tma.pk %}" class="btn btn-primary btn-sm">Add question</a>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+</div>
+
+{% include 'includes/pagination.html' %}
+
+{% endblock %}

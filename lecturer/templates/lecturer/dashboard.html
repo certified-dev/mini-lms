@@ -1,0 +1,46 @@
+{% extends 'lecturer/base_home.html' %}
+
+{% load static %}
+
+{% block head_title %} Home | StudyWare Dashboard {% endblock %}
+
+{% block content %}
+   
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+  </nav>
+
+<div class="row mb-5">
+    <div class="col-md-8 col-lg-8 mb-3">
+        <div class="card">
+            <div class="text-center mt-5 mb-5">
+                <p><strong>Welcome</strong>, {{user.full_name}}</p>
+            </div>
+       </div>
+    </div>
+    
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+       </div>
+    </div>
+
+    <div class="col-md-4 col-lg-4 mb-3">
+     <div class="card">
+       </div>
+    </div>
+
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+       </div>
+    </div>
+
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+       </div>
+    </div>
+</div>
+{% endblock %}
+

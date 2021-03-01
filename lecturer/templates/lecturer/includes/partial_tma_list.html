@@ -1,0 +1,32 @@
+{% for tma in tmas %}
+<tr>
+    <td class="align-middle">{{ forloop.counter }}</td>
+    <td class="align-middle"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.title|upper }}</a></td>
+    <td class="align-middle">{{ tma.course }}</td>
+    <td class="align-middle">{{ tma.questions_count }}</td>
+    <td class="align-middle">{{ tma.taken_count }}</td>
+    <td class="text-right">
+
+        <div class="row justify-content-center">
+
+        <div class="col-sm-2">
+            <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-info btn-sm" style="border-radius:50px;"><i class="fas fa-pen"></i></a>
+        </div>
+        <div class="col-sm-2">
+            <button type="button" class="js-delete-tma btn btn-outline-danger btn-sm" data-url="{% url 'lecturer:tma_delete' tma.pk %}" style="border-radius:50px;"><i class="fa fa-trash"></i></button>
+        </div>
+        <div class="col-sm-2">
+            <a href="{% url 'lecturer:tma_results' tma.pk %}" class="btn btn-outline-success btn-sm" style="border-radius:50px;"><span class="fas fa-poll"></span></a>
+        </div>
+        
+        </div>
+
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td class="bg-light text-center font-italic" colspan="7">You haven't added any tma yet.
+    </td>
+</tr>
+{% endfor %}
+
