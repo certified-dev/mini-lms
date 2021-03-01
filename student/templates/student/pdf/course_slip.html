@@ -1,0 +1,52 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        body {
+        background-color: gray;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<div class="card-body">
+<p class="mt-5"><strong>{{ user.username }} </strong></p>
+<p><strong>{{ user }}</strong></p>
+<p><strong>First Semester {% now "Y" %}</strong></p>
+<div class="text-center"><strong>Registered Courses</strong></div>
+<div class="table-responsive">
+                <table class="table table-hover mb-0" id="dataTables-example" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Title</th>
+                            <th>Designation</th>
+                            <th>Credit Unit</th>
+                            <th>Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in user.student.courses.all %}
+                        <tr>
+                            <td>{{ course.code }}</td>
+                            <td>{{ course.title }}</td>
+                            <td>{{ course.designation }}</td>
+                            <td>{{ course.credit_unit }}</td>
+                            <td>{{ course.fee }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="bg-light text-center font-italic" colspan="7">you haven't registered any course.<br>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+</div>
+</div>
+    
+</div>
+</body>
+</html>

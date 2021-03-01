@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block icon %}
+<link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.png' %}">
+{% endblock %}
+
+{% block css %}
+<link href="{% static 'assets/css/styles.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block base_home_js %}
+<script src="{% static 'assets/js/scripts.js' %}"></script>
+<script src="{% static 'assets/vendor/sweetalert/sweetalert2.all.min.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+  <a class="navbar-brand" href="{% url 'home' %}">Study<b>Ware</b></a>
+  <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+
+  <!-- Navbar Search -->
+  <div class="d-none d-md-inline-block ml-auto mr-0 mr-md-3 my-2 my-md-0">
+       <a class="nav-link text-muted" href="{% url 'student:wallet' %}"><i class="fa fa-money-bill" style="color:green"></i> Naira {{ user.student.wallet_balance }}</a>
+  </div>
+
+  <!-- Navbar-->
+  <ul class="navbar-nav ml-auto ml-md-0">
+   <li class="nav-item dropdown d-none d-md-inline-block">
+     <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-link"></i> Quick Links</a>
+     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+     <a href="javascript:void(0)" id="switch-mode" class="dropdown-item"><i class="fas fa-adjust"></i> Switch to <span id="mode">Light</span> Mode</a>
+    </div>
+ </li>
+    
+      <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user fa-fw"></i> {{user.username|lower}}</a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+              <a href="{% url 'password_change' %}" class="dropdown-item"><i class="fas fa-lock"></i> Change password</a>
+              <a href="javascript:void(0)" id="upload_user_photo" class="dropdown-item"><i class="fas fa-image"></i> Photo upload</a>
+              <a  href="{% url 'student:wallet' %}" class="dropdown-item"><i class="fas fa-wallet"></i> eWallet</a>
+              <div class="dropdown-divider"></div>
+              <a href="{% url 'logout' %}" class="dropdown-item"><i class="fas fa-power-off" style="color:red;"></i> Logout</a>
+          </div>
+      </li>
+  </ul>
+</nav>
+
+<div id="layoutSidenav">
+  <div id="layoutSidenav_nav">
+      <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+          <div class="sb-sidenav-menu">
+              <div class="nav">
+                  <div class="sb-sidenav-menu-heading">Core</div>
+                  <a class="nav-link" href="{% url 'student:dashboard' %}">
+                      <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                      Dashboard
+                  </a>
+                  <div class="sb-sidenav-menu-heading">Interface</div>
+                  <a class="nav-link collapsed {% if 'register' in request.path %} active {% endif %}" href="#" data-toggle="collapse" data-target="#collapseRegistration" aria-expanded="false" aria-controls="collapseLayouts">
+                      <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
+                      Registration
+                      <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                  </a>
+                  <div class="collapse" id="collapseRegistration" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                      <nav class="sb-sidenav-menu-nested nav nav accordion" id="sidenavAccordionPages">
+                        {% if not user.student.semester_registered %}
+                        <a class="nav-link" href="{% url 'student:sem_reg' %}">Semester</a>
+                        {% endif %}
+                        <a class="nav-link" href="{% url 'student:reg_course' %}">Courses</a>
+                        <a class="nav-link" href="{% url 'student:exam_reg' %}">Exam</a>
+                        <a class="nav-link" href="{% url 'student:project' %}">Project</a>
+
+                        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#RegistrationCollapseSlips" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                          Slips
+                          <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="RegistrationCollapseSlips" aria-labelledby="headingOne" data-parent="#sidenavAccordionPages">
+                          <nav class="sb-sidenav-menu-nested nav">
+                            {% if user.student.semester_registered %}
+                            <a href="{% url 'student:semester_slip' %}" class="nav-link">Semester</a>
+                              {% endif %}
+                              {% if user.student.courses.count > 0 %}
+                            <a href="{% url 'student:courses_slip' %}" class="nav-link">Courses</a>
+                            {% endif %}
+                           {% if user.student.exams.count > 0 %}
+                             <a href="{% url 'student:exams_slip' %}" class="nav-link">Exam</a>
+                              {% endif %}
+                            {% if user.student.project_registered %}
+                            <a href="#" class="nav-link">Project</a>
+                              {% endif %}
+                            <a href="{% url 'student:id_card' %}" class="nav-link">Identity Card</a>
+                            
+                          </nav>
+                        </div>
+                       
+                      </nav>
+                  </div>
+                  <a class="nav-link collapsed {% if 'tma' in request.path %} active {% endif %}" href="#" data-toggle="collapse" data-target="#collapseAssessment" aria-expanded="false" aria-controls="collapseLayouts">
+                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                    Assessment
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+                <div class="collapse" id="collapseAssessment" aria-labelledby="headingTwo" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="{% url 'student:tma_list' %}">T.M.A</a>
+                    </nav>
+                </div>
+                <a class="nav-link" href="{% url 'student:student_courses' %}">
+                  <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                  My Courses
+                 </a>
+                  <div class="sb-sidenav-menu-heading">Addons</div>
+                  <a class="nav-link" href="{% url 'student:wallet' %}">
+                      <div class="sb-nav-link-icon"><i class="fas fa-wallet"></i></div>
+                      Wallet
+                  </a>
+                  <a class="nav-link" href="{% url 'student:board' %}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-podcast"></i></div>
+                    Podcast
+                </a>
+              </div>
+          </div>
+          <div class="sb-sidenav-footer">
+              <div class="small">Logged in as:</div>
+              {{ user }}
+          </div>
+      </nav>
+  </div>
+  <div id="layoutSidenav_content">
+      <main>
+          <div class="container-fluid">
+
+            {% for message in messages %}
+              <span style="display:none">
+                  <span id="message">{{ message }}</span>
+                  <span id="message_tag">{{ message.tags }}</span>
+              </span>
+            {% endfor %}
+            {{ user.photo.url|json_script:"user_photo" }}
+
+            {% block content %}
+              
+            {% endblock %}     
+          </div>
+      </main>
+      <footer class="py-4 bg-light mt-auto">
+          <div class="container-fluid">
+              <div class="d-flex align-items-center justify-content-between small">
+                  <div class="text-muted">Copyright &copy; StudyWare 2020</div>
+                  <div>
+                      <a href="#">Privacy Policy</a>
+                      &middot;
+                      <a href="#">Contact Us</a>
+                  </div>
+              </div>
+          </div>
+      </footer>
+  </div>
+</div>
+
+<script src="{% static 'assets/vendor/jquery3/jquery.min.js' %}"></script>
+  <script>
+    $("#menu-toggle").click(function(e) {
+      e.preventDefault();
+      $("#wrapper").toggleClass("toggled");
+      $("#click").toggleClass("fa-angle-double-right fa-angle-double-left ");
+    });
+
+    $(document).ready(function() {
+        $("#modelId").modal('show');
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'student/base_home.html' %}
+
+{% load static %}
+
+{% block head_title %} Courses | StudyWare {% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+    <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item active">Courses</li>
+    </ol>
+  </nav>
+
+{% if check >= 24  %}
+{% else %}
+    <a id="reg_course" href="{% url 'student:reg_course' %}" class="btn btn-primary mb-3"><i class="fas fa-plus" style="color:white;"></i> Add Course</a>
+{% endif %}
+
+<div class="badge badge-info float-right">
+    <h5 class="mb-0">{{ user.student.session }}</h5>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12 col-lg-12">
+        <div class="card mb-4 pb-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center small font-weight-bold">S/N</th>
+                            <th class="text-center small font-weight-bold">Course</th>
+                            <th class="text-center small font-weight-bold">Title</th>
+                            <th class="text-center small font-weight-bold">Designation</th>
+                            <th class="text-center small font-weight-bold">Credit Unit</th>
+                            <th class="text-center small font-weight-bold">TMA 1</th>
+                            <th class="text-center small font-weight-bold">TMA 2</th>
+                            <th class="text-center small font-weight-bold">TMA 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in user.student.courses.all %}
+                        <tr>
+                            <td class="text-center small">{{ forloop.counter}}</td>
+                            <td class="text-center small">{{ course.code }}</td>
+                            <td class="text-center small">{{ course.title }}</td>
+                            <th class="text-center small">{{ course.designation }}</td>
+                            <td class="text-center small">{{ course.credit_unit }}</td>
+
+                            {% if course.tma1_done %}
+                            <td class="text-center small"><span class="fas fa-check" style="color:forestgreen"></span></td>
+                            {% else %}
+                            <td class="text-center small"><span class="fas fa-question" ></span></td>
+                            {% endif %}
+
+                            {% if course.tma2_done %}
+                            <td class="text-center small"><span class="fas fa-check" style="color:forestgreen"></span></td>
+                            {% else %}
+                            <td class="text-center small"><span class="fas fa-question"></span></td>
+                            {% endif %}
+
+                            {% if course.tma3_done %}
+                            <td class="text-center small"><span class="fas fa-check" style="color:forestgreen"></span></td>
+                            {% else %}
+                            <td class="text-center small"><span class="fas fa-question"></span></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="bg-light text-center font-italic p-3" colspan="12">you haven't registered any course.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ user.student.semester_registered|json_script:"sem_reg_status" }}
+{% endblock %}

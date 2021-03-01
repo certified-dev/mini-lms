@@ -1,0 +1,16 @@
+<div class="card">
+    <div class="card-header text-center"> 
+        <h3>
+            <div class="badge badge-info">{{ taken_tma.tma.title|upper}}</div>
+        </h3>
+    </div>
+    <div class="card-body text-center">
+        <p class="card-text"><i class="fas fa-file-contract"></i> Course: {{ taken_tma.tma.course|upper}}</p>
+        <p class="card-text"><i class="fas fa-question"></i> Total Questions: {{ total_questions }}</p>
+        <p class="card-text"><i class="fas fa-list"></i> Total Score: {{ taken_tma.score }}</p>
+        <p class="card-text"><i class="fas fa-check-circle"></i> Correct Answers: {{ taken_tma.correct_answers }}</p>
+        <p class="card-text"><i class="fas fa-times-circle"></i> Incorrect Answers: {{ taken_tma.incorrect_answers }}</p>
+        <p class="card-text"><i class="fas fa-calendar"></i> Date Taken: {{ taken_tma.date|date:" D d M Y " }}</p>
+        <p class="card-text"><i class="fas fa-clock"></i> Time Taken: {{ taken_tma.date|time:" h:i a " }}</p>
+    </div> 
+</div>

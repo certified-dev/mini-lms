@@ -1,0 +1,68 @@
+{% extends 'student/base_home.html' %}
+
+{% load static %}
+
+{% block head_title %} Home | StudyWare Dashboard {% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item active">Dashboard</a></li>
+    </ol>
+  </nav>
+
+<div class="row mb-5">
+    <div class="col-md-8 col-lg-8 mb-3">
+        <div class="card">
+            <div class="text-center mt-5 mb-5">
+                <p><strong>Welcome</strong>, {{user.full_name}}</p>
+            </div>
+       </div>
+    </div>
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+            <div class="text-center mt-5 mb-5">
+
+            </div>
+       </div>
+    </div>
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+            <div class="card-header text-center">TMA Countdown</div>
+            <div class="text-center mt-5 mb-5">
+            <p><strong>DD-HH-MM-SS</strong></p>
+            </div>
+       </div>
+    </div>
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+            <div class="card-header text-center">Registered Courses {{ user.student.session }}</div>
+            <div class="text-center mt-1 mb-1">
+            {% for course in courses %}
+             <small><strong>{{ course }}</strong></small>
+             <br>
+             {% empty %}
+             <p class="text-center"><strong>N/A</strong></p>
+            {% endfor %}
+            </div>
+       </div>
+    </div>
+    <div class="col-md-4 col-lg-4 mb-3">
+        <div class="card">
+            <div class="card-header text-center">Available TMA {{ user.student.session }}</div>
+            <div class="text-center mt-1 mb-1">
+            {% for tma in tmas %}
+             <small><strong>{{ tma.course }}/{{ tma.title }}</strong></small>
+             <br>
+             {% empty %}
+             <p class="text-center"><strong>N/A</strong></p>
+            {% endfor %}
+            </div>
+       </div>
+    </div>
+</div>
+
+
+{% endblock %}
+

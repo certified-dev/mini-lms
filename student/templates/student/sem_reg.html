@@ -1,0 +1,70 @@
+{% extends 'student/base_home.html' %}
+
+{% load static humanize %}
+
+{% block head_title %} Register Semester | StudyWare {% endblock %}
+
+{% block content %}
+
+ <div class="modal fade " id="Sem_Registration" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold"><i class="fa fa-list" aria-hidden="true"></i>  Semester Registration</h5>
+                <a href="{% url 'student:dashboard' %}" class="close"  aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </a>
+            </div>
+            <div class="modal-body">
+                <p class="text-center"><small><strong>You Need  Make The Following Payments To Register For This Semester</strong></small></p>
+                {% if user.student.wallet_balance < cost %}
+                <div class="alert alert-warning m-0 text-center">
+                    <h5 class="alert-title "><i class="fas fa-exclamation-triangle"></i> Insufficient Funds!!!</h5>
+                </div>
+                {% endif %}
+                <div class="card mb-0 mt-2">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Expense</th>
+                            <th>Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ forloop.counter}}</td>
+                            <td>{{ expense.name }}</td>
+                            <td>₦{{ expense.amount   | intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td>   </td>
+                            <td><h5><strong>Total:</strong></h5></td>
+                            <td class="text-danger"><h5><strong>₦{{ cost | intcomma}}</strong></h5></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'student:dashboard' %}" class="btn btn-danger">Close</a>
+                {% if user.student.wallet_balance < cost %}
+                <a href="{% url 'student:wallet' %}" class="btn btn-primary"><span class="fas fa-credit-card"></span> Refill Wallet</a>
+                {% else %}
+                <a href="{% url 'student:sem_pay' %}" class="btn btn-success"><span class="fas fa-angle-right"></span> Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center middle-banner"><h1><span class="fas fa-user-graduate"></span> STUDY<b>WARE</b></h1></div>
+
+{{ semester|json_script:"semester" }}  
+{{ user.student.registration_open|json_script:"reg_open" }}  
+{{ user.student.semester_registered|json_script:"sem_reg_status" }}
+{% endblock %}

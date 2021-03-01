@@ -1,0 +1,85 @@
+{% extends 'student/base_home.html' %}
+
+{% load static humanize crispy_forms_tags widget_tweaks %}
+
+{% block head_title %} Assessment - Exams | StudyWare {% endblock %}
+
+{% block content %}
+
+<div class="modal fade " id="Add_Exam" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Exams Registration</h5>
+                <button class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+            </div>
+            <div class="modal-body">
+                <form id="exam_form" method="post" novalidate>
+                   {% csrf_token %}
+                   {{ form|crispy }} 
+                </form>
+            </div>
+            <div class="modal-footer">
+                 <input class="btn btn-success" type="submit" value="Register" form="exam_form">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Assessment</li>
+      <li class="breadcrumb-item active">Exams</li>
+    </ol>
+  </nav>
+
+  <div class="row mb-2">
+    <div class="col">
+        
+        <button id="exam_reg" class="btn btn-primary"><i class="fas fa-plus" style="color:white;"></i> Add</button>
+        
+     </div>
+    <div class="col">
+       <div class="badge badge-info float-right"> <h5 class="mb-0">{% now "Y" %}/1</h5></div> 
+    </div>
+</div>
+
+    <div class="card mb-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                <tr>
+                    <th class="small font-weight-bold text-center">SN</th>
+                    <th class="small font-weight-bold text-center">Course</th>
+                    <th class="small font-weight-bold text-center">Title</th>
+                    <th class="small font-weight-bold text-center">Exam Cost</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for exam in user.student.exams.all %}
+                <tr>
+                    <td class="text-center small">{{ forloop.counter}}</td>
+                    <td class="text-center small">{{ exam.course.code }}</td>
+                    <td class="text-center small">{{ exam.course.title }}</td>
+                    <td class="text-center small">₦{{ exam.fee|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td class="bg-light text-center font-italic p-3" colspan="7">you haven't registered any exams yet.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>  
+
+
+{{ user.student.courses.count|json_script:"course_count" }}  
+{{ user.student.semester_registered|json_script:"sem_reg_status" }}
+{{ user.student.wallet_balance|json_script:"wallet_balance" }}
+{{ student_exams|json_script:"exams" }}
+
+{% endblock %}

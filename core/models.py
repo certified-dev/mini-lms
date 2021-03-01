@@ -36,13 +36,14 @@ def user_topic_directory_path(instance, filename):
 
 
 class Session(models.Model):
-    title = models.CharField()
+    title = models.CharField(max_length=10)
     start_date = models.DateField()
     close_date = models.DateField()
     active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
+
 
 
 class Faculty(models.Model):

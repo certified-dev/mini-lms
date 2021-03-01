@@ -1,0 +1,107 @@
+{% extends 'student/base_home.html' %}
+
+{% load static humanize %}
+
+{% block head_title %} Topic - Posts | StudyWare {% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item">Board</li>
+      <li class="breadcrumb-item "><a href="{% url 'student:board' %}">Topics</a></li>
+      <li class="breadcrumb-item active">{{ topic.subject|capfirst }}</li>
+    </ol>
+  </nav>
+
+
+  <div class="card mb-3 laptop"  style="border-radius:0;">
+  <div class="card-title py-2 px-3 m-0"><strong>{{ topic.subject|capfirst }}</strong> <small class="text-muted float-right">{{ topic.added_on|naturaltime }}</small></div>
+    <div class="card-body pb-2 pt-1">
+    
+      <p class="card-text"><div class="container p-0">{{ topic.message.html|safe }}</div></p>
+      <div class="row">
+      <div class="col-2">
+         <a href="{% url 'student:reply_topic' topic.pk %}" class="btn btn-primary btn-sm mt-2" role="button">Reply</a>
+         </div>
+         <div class="col-10">
+         {% if topic.files.url|length > 2 %}
+            <p><a href="{{ topic.files.url }}"class="float-right mt-2" download><button class="btn rounded-pill btn-info"> <span class="fas fa-file-download"></span></button></a></p>
+         {% endif %}
+         </div>
+         </div>
+    </div>
+  </div>
+
+  <div class="container p-2 border mobile mb-2">  
+    <div class="row">
+      <div class="col-12 pb-1">
+        <strong>{{ topic.subject|capfirst }}</strong><small class="text-muted float-right pt-1">{{ topic.added_on|naturaltime }}</small>
+      </div>
+      <div class="col-12">
+        {{ topic.message.html|safe }}
+      </div>
+      <div class="col-12">
+         <a href="{% url 'student:reply_topic' topic.pk %}" >Reply</a>
+        {% if topic.files.url|length > 2 %}
+        <a href="{{ topic.files.url }}"class="float-right" download>Download<span class="fas fa-file-download"></span></button></a>
+     {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% for post in posts %}
+
+  <div class="card {% if forloop.last %}mb-4{% else %}mb-2{% endif %} laptop">
+    <div class="card-body p-3">
+      <div class="row">
+        <div class="col-1 text-center pl-2">
+          <img src="{{ post.created_by.photo.url }}" alt="{{ post.created_by.username }}" width="70" height="70" class="rounded-circle">
+        </div>
+        <div class="col-11">
+          <div class="row">
+            <div class="col-6">
+              <small><strong class="text-muted">{{ post.created_by.username }}</strong></small>
+            </div>
+            <div class="col-6 text-right">
+              <small class="text-muted">{{ post.created_at|naturaltime }}</small>
+            </div>
+          </div>
+          {{ post.message.html|safe }}
+        </div>
+        
+        {% if post.created_by == user %}
+          <div class="col-12 text-right">
+            <span><a href="{% url 'student:edit_post' post.topic.pk post.pk %}" >edit</a>  <a href="#" class="text-danger ml-3">delete</a> </span>
+          </div>
+        {% endif %}
+            
+      </div>
+    </div>
+  </div>
+    
+    <div class="container p-2 border-bottom mobile mb-2">  
+      <div class="row">
+        <div class="col-12">
+          {{ post.message.html|safe }}
+        </div>
+        <div class="col-12">
+          <img src="{{ post.created_by.photo.url }}" alt="{{ post.created_by.username }}" width="20" height="20" class="rounded-circle mr-1">
+          <small><strong class="text-muted">{{ post.created_by.username }}</strong></small>
+          {% if post.created_by == user %}
+          <span class="text-secondary">| <a href="{% url 'student:edit_post' post.topic.pk post.pk %}" >edit</a> | <a href="#" class="text-danger">delete</a> </span>
+          {% endif %}
+          
+          <span class="float-right text-muted small">{{ post.created_at|naturaltime }}</span>
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <div class="card ml-3 mr-3">
+      <div class="card-body bg-light text-center font-italic">No comments yet.</div>
+    </div>
+  {% endfor %}
+
+  {% include 'includes/pagination.html' %}
+
+{% endblock %}

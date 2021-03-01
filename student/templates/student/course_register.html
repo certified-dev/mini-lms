@@ -1,0 +1,92 @@
+{% extends 'student/base_home.html' %}
+
+{% load static humanize %}
+
+{% block head_title %} Register Courses | StudyWare {% endblock %}
+
+{% block content %}
+
+<!-- Modal -->
+<div class="modal fade" id="Add_Courses" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Course Registration</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-center"><small><strong> You can register up to a maximum of 24 credit unit courses</strong></small></p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="card p-2">
+                            {{ form.as_table }}
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-2 float-right">Register</button>
+                        <button type="button" class="btn btn-outline-danger mt-2 float-right mr-2" data-dismiss="modal" >Cancel</button>   
+                  </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-4">
+      <li class="breadcrumb-item"><a href="{% url 'student:student_courses' %}">Courses</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Register Courses</li>
+    </ol>
+</nav>
+
+<button id="reg" class="btn btn-primary mb-3"><i class="fas fa-plus" style="color:white;"></i> Select</button>
+<div class="badge badge-info float-right"> <h5 class="mb-0">{{ user.student.session }}</h5></div>
+
+    <div class="row mb-4">
+        <div class="col-md-12 col-lg-12">
+            <div class="card mb-4 p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="small font-weight-bold">S/N</th>
+                            <th class="small font-weight-bold">Course</th>
+                            <th class="small font-weight-bold">Title</th>
+                            <th class="small font-weight-bold"></th>
+                            <th class="text-center small font-weight-bold">Credit Unit</th>
+                            <th class="text-center small font-weight-bold">Designation</th>
+                            <th class="text-center small font-weight-bold">level</th>
+                            <th class="small font-weight-bold">Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in level_courses %}
+                        <tr>
+                            <td class="small">{{ forloop.counter}}</td>
+                            <td class="small">{{ course.code }}</td>
+                            <td class="small">{{ course.title }}</td>
+                            <td>
+                            {% if course in user.student.courses.all %}
+                             <span class="badge badge-success">R</span>
+                            {% endif %}
+                            </td>
+                            <td class="text-center small">{{ course.credit_unit }}</td>
+                            <td class="text-center small">{{ course.designation }}</td>
+                            <td class="text-center small">{{ course.level }}</td>
+                            <td class="small">₦{{ course.fee|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+    </div>
+
+{{ user.student.registration_open|json_script:"reg_open" }}  
+{{ user.student.semester_registered|json_script:"sem_reg_status" }}
+{{ user.student.wallet_balance|json_script:"wallet_balance" }}
+{{ student_courses|json_script:"courses" }}
+{{ reg_check|default_if_none:"0"|json_script:"reg_check" }}
+
+{% endblock %}

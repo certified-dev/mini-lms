@@ -97,11 +97,10 @@ TEMPLATES = [
 ]
 
 STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 
 ]
-
 
 WSGI_APPLICATION = 'mini_lms.wsgi.application'
 
@@ -160,9 +159,7 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
 SITE_ID = 1
-
 
 # Django Auth Settings
 LOGIN_URL = 'login'
@@ -208,7 +205,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_TIMEZONE = 'Africa/Lagos'
 
-
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 
 ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
@@ -222,14 +218,14 @@ FLUENT_DASHBOARD_DEFAULT_MODULE = 'admin_tools.dashboard.modules.AppList'
 FLUENT_DASHBOARD_APP_ICONS = {
     'core/user': 'meeting-participant.png',
     'core/topic': 'newspaper1.png',
-     'core/post': 'chat-1.png',
+    'core/post': 'chat-1.png',
     'lecturer/lecturer': 'users7.png',
     'student/student': 'network60.png',
     'core/study_centre': 'main-page.png',
 }
 
 FLUENT_DASHBOARD_APP_GROUPS = (
-    
+
     ('Administration', {
         'models': (
             'django.contrib.sites.*',
@@ -238,30 +234,31 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('School', {
         'models': (
+            'core.models.Session',
             'core.models.Faculty',
             'core.models.Department',
             'core.models.Level',
             'core.models.Programme',
-            'core.models.Course',
-            ),
+            'core.models.Course'
+        ),
     }),
     ('T.M.A', {
         'models': (
-        'core.models.Tma',
-        'core.models.Question',
-        'core.models.Answer',
-        'student.models.TakenTma',
-        'student.models.StudentAnswer',
+            'core.models.Tma',
+            'core.models.Question',
+            'core.models.Answer',
+            'student.models.TakenTma',
+            'student.models.StudentAnswer',
         ),
 
     }),
     ('Examination', {
         'models': (
-        'exams.models.Exam',
-        'exams.models.Question',
-        'exams.models.Answer',
-        'exams.models.TakenExam',
-        'exams.models.QuestionAnswer'
+            'exams.models.Exam',
+            'exams.models.Question',
+            'exams.models.Answer',
+            'exams.models.TakenExam',
+            'exams.models.QuestionAnswer'
 
         ),
 
@@ -270,7 +267,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
         'models': (
             'lecturer.models.Lecturer',
             'student.models.Student',
-        
+
         ),
     }),
     ('Boards', {
@@ -279,7 +276,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'core.models.Post',
         ),
     }),
-     ('Others', {
+    ('Others', {
         'models': (
             'student.models.Payment',
             'core.models.Expense',

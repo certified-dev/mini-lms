@@ -1,0 +1,24 @@
+<html>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        * {
+        background-color: gray;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Id Card</h1>
+<p><b>Matric Number</b> : {{ user.username }}</p>
+<p><b>Name</b> : {{ user }}</p>
+<p><b>Programme</b> : {{ user.student.programme }} {{ user.student.department }}</p>
+<p><b>Study Centre</b> : {{ user.student.study_centre }}</p>
+<p><b>Session</b> : {% now "Y" %}/1</p>
+
+<img src="{{ user.photo.url }}" />
+</body>
+
+</html>

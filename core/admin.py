@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 
 from core.models import Faculty, Department, Level, Course, Study_Centre, User, Expense, Programme, Tma, \
-    Question, Answer, Topic, Post
+    Question, Answer, Topic, Post, Session
 
 admin.site.register(Level)
 admin.site.register(Course)
@@ -13,6 +13,7 @@ admin.site.register(Question)
 admin.site.register(Expense)
 admin.site.register(Answer)
 admin.site.register(Post)
+admin.site.register(Session)
 
 admin.site.unregister(Group)
 
