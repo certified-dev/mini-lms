@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block head_title %} Signup | StudyWare {% endblock %}
+
+{% block body %}
+      <div class="container">
+          <div class="row justify-content-center">
+        <h4 class="mt-5"><a href="#">Choose Account type</a></h4>
+    </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-3 mt-3">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'assets/img/student.jpg' %}" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title"></h5>
+                        <p class="card-text"><small class="text-muted"><a href="{% url 'student_signup' %}"  class="btn btn-primary btn-lg btn-block"><span class="fa fa-user-graduate"></span> Student</a></small></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3 mt-3">
+                <div class="card mb-3">
+                    <img class="card-img-top" src="{% static 'assets/img/teacher.jpg' %}" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title"></h5>
+                        <p class="card-text"><small class="text-muted"><a href="{% url 'lecturer_signup' %}" class="btn btn-primary btn-lg btn-block"><span class="fa fa-chalkboard-teacher"></span> Lecturer</a></small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+<footer>
+    <div class="text-center">
+        <p class="text-muted">Already Have An Account? <a href="{% url 'login' %}">Login</a></p>
+    </div>
+</footer>
+{% endblock %}

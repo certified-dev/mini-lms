@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="author" content="" />
+    <meta name="description" content="StudyWare By Karma" />
+    {% block icon %}
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/university-solid.ico' %}">
+    {% endblock %}
+    <link rel="stylesheet" href="{% static 'assets/vendor/bootstrap4/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendor/fontawesome5/all.min.css' %}">
+    {% block css %} {% endblock %}
+    {% block extra_css %} {% endblock %}
+    <title>{% block head_title %} {% endblock %}</title>
+</head>
+
+<body class="sb-nav-fixed">
+
+    {% block body %}
+    {% block content %}
+    {% endblock %}
+    {% endblock %}
+
+    {% block extra_js %}{% endblock %}
+    <script type="text/javascript" src="{% static 'assets/vendor/jquery3/jquery.min.js' %}"></script>
+     <script>
+    $(document).ready(function() {
+        $("#modelId").modal('show');
+    });
+  </script>
+    <script src="{% static 'assets/vendor/bootstrap4/js/bootstrap.min.js' %}"></script>
+    {% block base_home_js %}{% endblock %}
+    {% block js %}{% endblock %}
+    <script src="{% static 'assets/vendor/bootstrap4/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/fontawesome5/all.min.js' %}"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% load static crispy_forms_tags widget_tweaks %}
+
+{% block head_title %} Login | StudyWare {% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+
+<div class="row justify-content-center">
+	<aside class="col-sm-5  mt-5">
+<div class="card">
+<article class="card-body">
+<a href="{% url 'signup' %}" class="float-right btn btn-outline-primary">Register</a>
+    <h4 class="card-title mb-4 mt-1"><strong>Sign in</strong></h4>
+	 <form  method="post" action="" novalidate>
+         {% csrf_token %}
+         <div class="form-group">
+	     	<img src="{% static 'assets/img/image.jpeg' %}" class="img-sm rounded-circle border mx-auto d-block mb-1" width="100" height="100">
+	     </div>
+
+         {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}
+            <p {% if forloop.last %} class="mb-0" {% endif %}>{{ error }}</p>
+             {% endfor %}
+          </div>
+          {% endif %}
+
+    <div class="form-group">
+        {{ form.username|as_crispy_field }}
+    </div>
+
+    <div class="form-group">
+    	<a class="float-right" href="{% url 'password_reset' %}">forgot?</a>
+        {{ form.password|as_crispy_field }}
+    </div>
+
+    <div class="form-group">
+    <div class="checkbox">
+      <label> <input type="checkbox"> Save password </label>
+    </div>
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary btn-block"> Login  <span class="fa fa-arrow-circle-right"></span></button>
+    </div>
+
+</form>
+    <hr>
+<p class="text-center">Don't an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+</article>
+</div>
+
+	</aside>
+</div>
+</div>
+
+{% endblock %}
+
+
+
