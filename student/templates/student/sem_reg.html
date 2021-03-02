@@ -65,6 +65,6 @@
 <div class="text-center middle-banner"><h1><span class="fas fa-user-graduate"></span> STUDY<b>WARE</b></h1></div>
 
 {{ semester|json_script:"semester" }}  
-{{ user.student.registration_open|json_script:"reg_open" }}  
+{{ reg_open|json_script:"reg_open" }}
 {{ user.student.semester_registered|json_script:"sem_reg_status" }}
 {% endblock %}

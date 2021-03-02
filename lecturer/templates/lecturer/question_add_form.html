@@ -36,16 +36,23 @@
         <div class="card">
             <div class="card-body">
                 <h2 class="mb-3">Add a new question</h2>
-  <p class="lead"><i class="fas fa-exclamation-circle" style="color:dodgerblue"></i> Add first the text of the question. In the next step you will be able to add the possible answers.
-  </p>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form|crispy }}
-      <p class="lead "><i class="fas fa-exclamation-circle" style="color:dodgerblue"></i> Use This Box For Math,Physics And Chemistry Equations</p>
-      <div class="mathfield" id='mf'></div>
-    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
-    <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
-  </form>
+
+                      <p class="lead ">
+                          <i class="fas fa-exclamation-circle" style="color:dodgerblue"></i>
+                          Use This Box For Math,Physics And Chemistry Equations
+                      </p>
+                <div class="mathfield" id='mf'></div>
+
+                <p class="lead">
+                    <i class="fas fa-exclamation-circle" style="color:dodgerblue"></i>
+                    Add first the text of the question. In the next step you will be able to add the possible answers.
+                </p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                    <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+                </form>
             </div>
         </div>
     </div>

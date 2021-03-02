@@ -1,15 +1,15 @@
+from django.conf import settings
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from core.models import Course, Study_Centre, Level, Programme, Tma, Answer, Department, Session
-from django.conf import settings
+from core.models import Course, Studycentre, Programme, Tma, Answer, Department, LEVEL
 
 
 class Student(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='student_dept')
-    study_centre = models.ForeignKey(Study_Centre, on_delete=models.CASCADE, related_name='center')
-    level = models.ForeignKey(Level, on_delete=models.CASCADE)
+    study_centre = models.ForeignKey(Studycentre, on_delete=models.CASCADE, related_name='center')
+    level = models.CharField(choices=LEVEL, max_length=10, blank=True)
     courses = models.ManyToManyField(Course, related_name='registered_courses', blank=True)
     tmas = models.ManyToManyField(Tma, through='TakenTma')
     exams = models.ManyToManyField("exams.Exam", related_name="registered_exams")
@@ -17,9 +17,7 @@ class Student(models.Model):
     paid_compulsory_fee = models.BooleanField(default=False)
     wallet_balance = models.PositiveIntegerField(default=0)
     semester_registered = models.BooleanField(default=False)
-    registration_open = models.BooleanField(default=False)
     tma_completed = models.BooleanField(default=False)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='student_session')
 
     def __str__(self):
         return self.user.first_name + ' ' + self.user.last_name + ' ' + self.user.other_name

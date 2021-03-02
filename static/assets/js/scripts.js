@@ -54,19 +54,6 @@ $(document).ready(function () {
 
   }
 
-//  $("input[type='checkbox']").change(function(){
-//  var total = $('input[type="checkbox"]:checked').length;
-//  alert(total)
-//  if (total > 0) {
-//  alert('greater');
-//
-//  $('input[type="checkbox"]:checked').attr('checked', false);
-//
-//  }
-//
-//
-//  });
-
 
   if ($("#semester").length){
 

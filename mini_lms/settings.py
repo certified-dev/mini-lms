@@ -239,7 +239,8 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'core.models.Department',
             'core.models.Level',
             'core.models.Programme',
-            'core.models.Course'
+            'core.models.Course',
+            'core.models.Semester'
         ),
     }),
     ('T.M.A', {
@@ -248,7 +249,8 @@ FLUENT_DASHBOARD_APP_GROUPS = (
             'core.models.Question',
             'core.models.Answer',
             'student.models.TakenTma',
-            'student.models.StudentAnswer',
+            'student.models.StudentAnswer'
+
         ),
 
     }),
@@ -280,7 +282,7 @@ FLUENT_DASHBOARD_APP_GROUPS = (
         'models': (
             'student.models.Payment',
             'core.models.Expense',
-            'core.models.Study_Centre',
+            'core.models.Studycentre',
         ),
     }),
 )

@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
-from core.models import User, Tma, Question, Answer, Topic, Post, Course
+from core.models import User, Tma, Question, Answer, Topic, Post, Course, Session
 from mini_lms.decorators import lecturer_required, anonymous_required
 from exams.models import Exam
 from lecturer.forms import LecturerSignUpForm, QuestionForm, BaseAnswerInlineFormSet, TmaForm, \
@@ -86,8 +86,8 @@ class StudentListView(ListView):
 
 
 def save_tma_form(request, form, template_name):
+    active_session = Session.objects.get(active=True)
     data = dict()
-    tmas = Tma.objects.all()
     if request.method == 'POST':
         if form.is_valid():
             tma_title = form.cleaned_data['title']
@@ -100,10 +100,11 @@ def save_tma_form(request, form, template_name):
                 tma = form.save(commit=False)
                 tma.is_open = True
                 tma.admin = request.user.lecturer
+                tma.session = active_session
                 tma.save()
                 data['form_is_valid'] = True
                 data['html_tma_list'] = render_to_string('lecturer/includes/partial_tma_list.html', {
-                    'tmas': Tma.objects.filter(own=request.user)
+                    'tmas': Tma.objects.filter(admin=request.user.lecturer)
                 })
                                            
         else:

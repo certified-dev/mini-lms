@@ -61,7 +61,6 @@
         <div class="card-body bg-danger border-danger text-white py-2">{{ error }}</div>
       {% endfor %}
       <div class="list-group list-group-flush list-group-formset">
-          <div class="mathfield m-2" id='mf1' ></div>
         {% for form in formset %}
           <div class="list-group-item">
             <div class="row">
@@ -131,12 +130,6 @@
 <script type="module">
 import MathLive from '{% static 'assets/vendor/mathlive/mathlive.mjs' %}';
      const mf = MathLive.makeMathField( 'mf', {
-       smartMode: true,
-       virtualKeyboardMode: 'manual',
-       smartSuperscript: true,
-
-});
- const mf1 = MathLive.makeMathField( 'mf1', {
        smartMode: true,
        virtualKeyboardMode: 'manual',
        smartSuperscript: true,

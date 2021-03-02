@@ -1,19 +1,15 @@
+from django import forms
+from django.contrib.auth import get_user_model
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
-from mini_lms.decorators import anonymous_required
-from django.contrib.auth import login as update_session_auth_hash
-from django.views.generic import TemplateView
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
-from django import forms 
+from django.views.generic import TemplateView
 
 from core.models import Department
-
+from mini_lms.decorators import anonymous_required
 
 User = get_user_model()
+
 
 class UploadPhotoForm(forms.ModelForm):
     class Meta:
@@ -42,14 +38,12 @@ def load_departments(request):
 
 
 def upload_photo(request):
-     if request.method == 'POST':
+    if request.method == 'POST':
         form = UploadPhotoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             # request.user.photo = request.FILES['photo']
             # request.user.save()
-            return JsonResponse({'error': False, 'message':'Uploaded Successfully!!!'})
+            return JsonResponse({'error': False, 'message': 'Uploaded Successfully!!!'})
         else:
-            return JsonResponse({'error': True, 'message':'Upload Failed!!!'})
-
-
+            return JsonResponse({'error': True, 'message': 'Upload Failed!!!'})

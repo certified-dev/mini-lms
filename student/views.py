@@ -50,9 +50,7 @@ class StudentSignUpView(CreateView):
         auth_login(self.request, self.user)
         student = self.user.student
         student.session = Session.objects.get(active=True)
-        if today_date > first_sem_reg_start_date or today_date > second_sem_reg_start_date:
-            student.registration_open = True
-            student.save()
+        student.save()
         messages.success(self.request, 'Student Account Created!')
         return redirect('student:dashboard')
 
@@ -108,17 +106,22 @@ class SemesterRegisterView(ListView):
     context_object_name = 'expenses'
 
     def get_context_data(self, **kwargs):
+        active_session = Session.objects.get(active=True)
+        if date.today() < active_session.registration_end:
+            reg_open = True
+        else:
+            reg_open = False
+
         if not self.request.user.student.paid_compulsory_fee:
             cost = Expense.objects.aggregate(Sum('amount'))['amount__sum']
-            extra_context = {'cost': cost, 'semester': True}
+            extra_context = {'cost': cost, 'semester': True, 'reg_open': reg_open, 'session': active_session.title}
+            kwargs.update(extra_context)
         else:
-            cost = \
-                Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy']).aggregate(
-                    Sum('amount'))[
-                    'amount__sum']
-            extra_context = {'cost': cost, 'semester': True}
-
-        kwargs.update(extra_context)
+            cost = Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy']).aggregate(
+                Sum('amount'))[
+                'amount__sum']
+            extra_context = {'cost': cost, 'reg_open': reg_open, 'session': active_session.title, 'semester': True}
+            kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
@@ -142,9 +145,7 @@ def semester_payment(request):
             expenses = Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy'])
             semester_cost = expenses.aggregate(Sum('amount'))['amount__sum']
 
-        if student.paid_compulsory_fee:
-            pass
-        else:
+        if not student.paid_compulsory_fee:
             student.paid_compulsory_fee = True
 
         student.semester_registered = True
@@ -178,18 +179,29 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
     success_url = reverse_lazy('student:course_pay')
 
     def get_context_data(self, **kwargs):
-        courses = Course.objects.filter(level=self.request.user.student.level, host_faculty=self.request.user.faculty)
-        others = Course.objects.filter(host_faculty__name="General Studies", level=self.request.user.student.level)
-        session = date.today().month
+        active_session = Session.objects.get(active=True)
+        if date.today() < active_session.registration_end:
+            reg_open = True
+        else:
+            reg_open = False
+
+        if '/1' in active_session.title:
+            session = 1
+        elif '/2' in active_session.title:
+            session = 2
+
+        courses = Course.objects.filter(semester__title=session, host_faculty=self.request.user.faculty)
+        others = Course.objects.filter(host_faculty__name="General Studies", semester__title=session)
 
         student_courses = list(self.request.user.student.courses.all().values_list('code', flat=True))
         reg_check = self.request.user.student.courses.aggregate(Sum('credit_unit'))['credit_unit__sum']
 
         extra_context = {
-            'session': session,
-            'level_courses': courses | others,
+            'semester_courses': courses | others,
             'reg_check': reg_check,
-            'student_courses': student_courses
+            'session': active_session.title,
+            'student_courses': student_courses,
+            'reg_open': reg_open
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -199,15 +211,8 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
 
     def form_valid(self, form):
         student = self.request.user.student
-        refund = student.courses.aggregate(Sum('fee'))['fee__sum']
-        courses_payment = Payment.objects.filter(owner=self.request.user.student, description="Course")
-
-        if refund is None:
-            pass
-        else:
-            student.wallet_balance = student.wallet_balance + refund
-            courses_payment.delete()
-
+        courses_cost = student.courses.all().aggregate(Sum('fee'))['fee__sum']
+        student.wallet_balance += courses_cost
         student.save()
         return super().form_valid(form)
 
@@ -223,15 +228,16 @@ def course_payment(request):
         student = request.user.student
         courses_cost = student.courses.aggregate(Sum('fee'))['fee__sum']
         student.wallet_balance = student.wallet_balance - courses_cost
+        student.save()
 
         for item in student.courses.all():
-            Payment.objects.create(
-                owner=request.user.student,
-                description="Course",
-                title=item.code,
-                cost=item.fee)
+            if not Payment.objects.filter(title=item.code).exists():
+                Payment.objects.create(
+                    owner=request.user.student,
+                    description="Course",
+                    title=item.code,
+                    cost=item.fee)
 
-        student.save()
         messages.success(request, 'Courses Registered successfully!')
         return redirect('student:student_courses')
 
@@ -253,10 +259,10 @@ class StudentCoursesView(ListView):
 
     def get_context_data(self, **kwargs):
         check = self.request.user.student.courses.aggregate(Sum('credit_unit'))['credit_unit__sum']
-        session = date.today().month
+        active_session = Session.objects.get(active=True)
         extra_context = {
             'check': check,
-            'session': session
+            'session': active_session.title,
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -284,8 +290,9 @@ class TmaListView(ListView):
     def get_queryset(self):
         student = self.request.user.student
         student_courses = student.courses.values_list('pk', flat=True)
+        active_session = Session.objects.get(active=True)
         taken_tmas = student.tmas.values_list('pk', flat=True)
-        queryset = Tma.objects.filter(course__in=student_courses) \
+        queryset = Tma.objects.filter(course__in=student_courses, session=active_session) \
             .exclude(pk__in=taken_tmas) \
             .annotate(questions_count=Count('questions')) \
             .filter(questions_count__gt=0)
@@ -401,9 +408,11 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
     success_url = reverse_lazy('student:exam_pay')
 
     def get_context_data(self, **kwargs):
+        active_session = Session.objects.get(active=True)
         student_exams = list(self.request.user.student.exams.all().values_list('course__code', flat=True))
         extra_context = {
-            'student_exams': student_exams
+            'student_exams': student_exams,
+            'session': active_session.title,
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -413,14 +422,8 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
 
     def form_valid(self, form):
         student = self.request.user.student
-        refund = student.exams.aggregate(Sum('fee'))['fee__sum']
-        exams_payment = Payment.objects.filter(owner=self.request.user.student, description="Exam")
-        if refund is None:
-            pass
-        else:
-            student.wallet_balance = student.wallet_balance + refund
-            exams_payment.delete()
-
+        exams_cost = student.exams.all().aggregate(Sum('fee'))['fee__sum']
+        student.wallet_balance += exams_cost
         student.save()
         return super().form_valid(form)
 
@@ -438,11 +441,12 @@ def exam_payment(request):
         student.wallet_balance = student.wallet_balance - exam_cost
 
         for item in student.exams.all():
-            Payment.objects.create(
-                owner=request.user.student,
-                description="Exam",
-                title=item.course,
-                cost=item.fee)
+            if not Payment.objects.filter(title=item.course).exists():
+                Payment.objects.create(
+                    owner=request.user.student,
+                    description="Exam",
+                    title=item.course,
+                    cost=item.fee)
 
         student.save()
         messages.success(request, 'Exams Registered successfully!')
@@ -554,4 +558,4 @@ class PostUpdateView(UpdateView):
 
     def form_invalid(self, form):
         messages.error(self.request, 'Check Your Input And Try Again.')
-        return super(ExamRegistrationView, self).form_invalid(form)
+        return super(PostUpdateView, self).form_invalid(form)

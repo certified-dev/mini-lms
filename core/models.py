@@ -11,10 +11,11 @@ from django_quill.fields import QuillField
 from lecturer.models import Lecturer
 
 LEVEL = (
-    ('100/1', '100/1'),
-    ('100/2', '100/2'),
-    ('200/1', '200/1'),
-    ('200/2', '200/2'),
+    ('Access', 'Access'),
+    ('100', '100'),
+    ('200', '200'),
+    ('300', '300'),
+    ('400', '400')
 )
 
 STATES = (
@@ -39,11 +40,11 @@ class Session(models.Model):
     title = models.CharField(max_length=10)
     start_date = models.DateField()
     close_date = models.DateField()
+    registration_end = models.DateField()
     active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
-
 
 
 class Faculty(models.Model):
@@ -53,13 +54,6 @@ class Faculty(models.Model):
 
     class Meta:
         verbose_name_plural = "Faculties"
-
-    def __str__(self):
-        return self.name
-
-
-class Level(models.Model):
-    name = models.CharField(choices=LEVEL, max_length=10, null=True)
 
     def __str__(self):
         return self.name
@@ -108,13 +102,19 @@ class Programme(models.Model):
         return self.name
 
 
+class Semester(models.Model):
+    title = models.CharField(max_length=10, null=True)
+
+    def __str__(self):
+        return self.title
+
+
 class Course(models.Model):
     DESIGNATION = (
         ('Core', 'Core'),
         ('Elective', 'Elective'),
     )
-
-    level = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     designation = models.CharField(choices=DESIGNATION, max_length=15, null=True)
     code = models.CharField(max_length=8)
@@ -130,7 +130,7 @@ class Course(models.Model):
         return self.code
 
 
-class Study_Centre(models.Model):
+class Studycentre(models.Model):
     name = models.CharField(max_length=20, null=True)
     code = models.CharField(max_length=10, null=True)
     address = models.CharField(max_length=50, null=True)
@@ -159,6 +159,7 @@ class Tma(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tmas')
     done = models.BooleanField(default=False)
     available = models.BooleanField(default=True)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='tma_session')
 
     def __str__(self):
         return '%s %s' % (self.course, self.title)

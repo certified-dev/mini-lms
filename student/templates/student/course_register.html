@@ -40,7 +40,7 @@
 </nav>
 
 <button id="reg" class="btn btn-primary mb-3"><i class="fas fa-plus" style="color:white;"></i> Select</button>
-<div class="badge badge-info float-right"> <h5 class="mb-0">{{ user.student.session }}</h5></div>
+<div class="badge badge-info float-right"> <h5 class="mb-0">{{ session }}</h5></div>
 
     <div class="row mb-4">
         <div class="col-md-12 col-lg-12">
@@ -55,12 +55,12 @@
                             <th class="small font-weight-bold"></th>
                             <th class="text-center small font-weight-bold">Credit Unit</th>
                             <th class="text-center small font-weight-bold">Designation</th>
-                            <th class="text-center small font-weight-bold">level</th>
+                            <th class="text-center small font-weight-bold">semester</th>
                             <th class="small font-weight-bold">Cost</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for course in level_courses %}
+                        {% for course in semester_courses %}
                         <tr>
                             <td class="small">{{ forloop.counter}}</td>
                             <td class="small">{{ course.code }}</td>
@@ -72,7 +72,7 @@
                             </td>
                             <td class="text-center small">{{ course.credit_unit }}</td>
                             <td class="text-center small">{{ course.designation }}</td>
-                            <td class="text-center small">{{ course.level }}</td>
+                            <td class="text-center small">{{ course.semester }}</td>
                             <td class="small">₦{{ course.fee|intcomma }}</td>
                         </tr>
                         {% endfor %}
@@ -83,7 +83,7 @@
         </div>
     </div>
 
-{{ user.student.registration_open|json_script:"reg_open" }}  
+{{ reg_open|json_script:"reg_open" }}
 {{ user.student.semester_registered|json_script:"sem_reg_status" }}
 {{ user.student.wallet_balance|json_script:"wallet_balance" }}
 {{ student_courses|json_script:"courses" }}

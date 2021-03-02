@@ -12,9 +12,8 @@ class StudentAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {'fields': ('user',)}),
-        ('Details', {'fields': ('department', 'level', 'programme', 'study_centre', 'courses', 'wallet_balance', 'session')}),
-        ('Actions', {'fields': ('semester_registered', 'paid_compulsory_fee','tma_completed')}),
-        ('Others', {'fields': ('registration_open',)}),
+        ('Details', {'fields': ('department', 'level', 'programme', 'study_centre', 'courses', 'wallet_balance')}),
+        ('Actions', {'fields': ('semester_registered', 'paid_compulsory_fee', 'tma_completed')})
     )
 
 
