@@ -10,7 +10,6 @@ urlpatterns = [
     path('slip/courses_registration/', views.courses_slip, name='courses_slip'),
     path('slip/exams_registration/', views.exams_slip, name='exams_slip'),
     path('dashboard/', views.dashboard, name='dashboard'),
-    # path('photo/upload/', views.PhotoUpdateView.as_view(), name='photo_upload'),
     path('wallet/', views.wallet, name='wallet'),
     path('semester/register/', views.SemesterRegisterView.as_view(), name='sem_reg'),
     path('semester/pay/', views.semester_payment, name='sem_pay'),

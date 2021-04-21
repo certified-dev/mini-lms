@@ -11,9 +11,8 @@ from mini_lms.decorators import anonymous_required
 User = get_user_model()
 
 
-class UploadPhotoForm(forms.ModelForm):
+class UploadPhotoForm(forms.Form):
     class Meta:
-        model = User
         fields = ('photo',)
 
 
@@ -39,11 +38,12 @@ def load_departments(request):
 
 def upload_photo(request):
     if request.method == 'POST':
-        form = UploadPhotoForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            # request.user.photo = request.FILES['photo']
-            # request.user.save()
-            return JsonResponse({'error': False, 'message': 'Uploaded Successfully!!!'})
-        else:
-            return JsonResponse({'error': True, 'message': 'Upload Failed!!!'})
+        item = request.FILES.get('photo')
+        if item:
+            user = request.user
+            user.photo = item
+            user.passport_uploaded = True
+            user.save()
+            return JsonResponse({'message': 'Uploaded Success!!!'})
+
+        return JsonResponse({'message': 'Upload Failed!!!'})

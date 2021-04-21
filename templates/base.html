@@ -25,19 +25,22 @@
     {% endblock %}
     {% endblock %}
 
+
     {% block extra_js %}{% endblock %}
     <script type="text/javascript" src="{% static 'assets/vendor/jquery3/jquery.min.js' %}"></script>
-     <script>
-    $(document).ready(function() {
-        $("#modelId").modal('show');
-    });
-  </script>
+    <script>
+        $(document).ready(function() {
+            $("#modelId").modal('show');
+        });
+    </script>
     <script src="{% static 'assets/vendor/bootstrap4/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/axios.min.js' %}"></script>
     {% block base_home_js %}{% endblock %}
     {% block js %}{% endblock %}
     <script src="{% static 'assets/vendor/bootstrap4/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'assets/js/popper.min.js' %}"></script>
     <script src="{% static 'assets/vendor/fontawesome5/all.min.js' %}"></script>
+
 </body>
 </html>
 

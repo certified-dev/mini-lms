@@ -45,7 +45,7 @@ class TakenTma(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '%s' % self.student
+        return '%s %s ' % (self.student, self.tma)
 
 
 class StudentAnswer(models.Model):

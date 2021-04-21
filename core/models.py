@@ -6,8 +6,6 @@ from django.db import models
 from django.utils.html import mark_safe
 from django.utils.text import Truncator
 
-from django_quill.fields import QuillField
-
 from lecturer.models import Lecturer
 
 LEVEL = (
@@ -61,8 +59,10 @@ class Faculty(models.Model):
 
 class Department(models.Model):
     name = models.CharField(max_length=50)
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='dept_faculty')
-    programme = models.ManyToManyField(settings.PROG_MODEL, related_name='student_program', blank=True)
+    faculty = models.ForeignKey(
+        Faculty, on_delete=models.CASCADE, related_name='dept_faculty')
+    programme = models.ManyToManyField(
+        settings.PROG_MODEL, related_name='student_program', blank=True)
 
     def __str__(self):
         return self.name
@@ -70,11 +70,13 @@ class Department(models.Model):
 
 class User(AbstractUser):
     other_name = models.CharField(max_length=20, null=True)
-    photo = models.ImageField(upload_to=user_directory_path, default='placeholder/image.jpeg')
+    photo = models.ImageField(
+        upload_to=user_directory_path, default='placeholder/image.jpeg')
     phone = models.CharField(max_length=15, null=True, blank=True)
     birth_date = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=100, blank=True)
-    birth_place = models.CharField(max_length=50, choices=STATES, default='Unknown')
+    birth_place = models.CharField(
+        max_length=50, choices=STATES, default='Unknown')
     sex = models.CharField(max_length=10, default='------')
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='student_faculty', blank=True,
                                 null=True)
@@ -86,7 +88,8 @@ class User(AbstractUser):
         return '%s %s %s' % (self.first_name, self.last_name, self.other_name)
 
     def full_name(self):
-        full_name = '%s %s %s' % (self.first_name, self.last_name, self.other_name)
+        full_name = '%s %s %s' % (
+            self.first_name, self.last_name, self.other_name)
         return full_name.strip()
 
     def photo_tag(self):
@@ -116,12 +119,15 @@ class Course(models.Model):
     )
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    designation = models.CharField(choices=DESIGNATION, max_length=15, null=True)
+    designation = models.CharField(
+        choices=DESIGNATION, max_length=15, null=True)
     code = models.CharField(max_length=8)
     credit_unit = models.SmallIntegerField()
     fee = models.PositiveIntegerField(null=True)
-    lecturer = models.ForeignKey(Lecturer, on_delete=models.DO_NOTHING, blank=True, null=True)
-    host_faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, null=True, blank=True)
+    lecturer = models.ForeignKey(
+        Lecturer, on_delete=models.DO_NOTHING, blank=True, null=True)
+    host_faculty = models.ForeignKey(
+        Faculty, on_delete=models.CASCADE, null=True, blank=True)
     tma1_done = models.BooleanField(default=False)
     tma2_done = models.BooleanField(default=False)
     tma3_done = models.BooleanField(default=False)
@@ -154,19 +160,23 @@ class Tma(models.Model):
         ('TMA 3', 'TMA 3'),
     )
 
-    admin = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='tmas')
+    admin = models.ForeignKey(
+        Lecturer, on_delete=models.CASCADE, related_name='tmas')
     title = models.CharField(max_length=50, choices=TMA)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tmas')
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name='tmas')
     done = models.BooleanField(default=False)
     available = models.BooleanField(default=True)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='tma_session')
+    session = models.ForeignKey(
+        Session, on_delete=models.CASCADE, related_name='tma_session')
 
     def __str__(self):
-        return '%s %s' % (self.course, self.title)
+        return '%s %s %s' % (self.course, self.title, self.session)
 
 
 class Question(models.Model):
-    tma = models.ForeignKey(Tma, on_delete=models.CASCADE, related_name='questions')
+    tma = models.ForeignKey(
+        Tma, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField('Question', max_length=4000)
 
     def __str__(self):
@@ -174,7 +184,8 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name='answers')
     text = models.CharField('Answer', max_length=500)
     is_correct = models.BooleanField('Correct answer', default=False)
 
@@ -184,13 +195,16 @@ class Answer(models.Model):
 
 class Topic(models.Model):
     subject = models.CharField(max_length=255)
-    message = QuillField()
-    files = models.FileField(upload_to=user_topic_directory_path, null=True, blank=True)
+    message = models.CharField(max_length=100000)
+    files = models.FileField(
+        upload_to=user_topic_directory_path, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now_add=True)
     added_on = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
-    lecturer = models.ForeignKey(Lecturer, related_name='topics', on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name='topics', on_delete=models.CASCADE)
+    lecturer = models.ForeignKey(
+        Lecturer, related_name='topics', on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course, related_name='topics', on_delete=models.CASCADE)
     views = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -217,12 +231,15 @@ class Topic(models.Model):
 
 
 class Post(models.Model):
-    message = QuillField()
-    topic = models.ForeignKey(Topic, related_name='posts', on_delete=models.CASCADE)
-    created_by = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
+    message = models.CharField(max_length=100000)
+    topic = models.ForeignKey(
+        Topic, related_name='posts', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        User, related_name='posts', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True)
-    updated_by = models.ForeignKey(User, null=True, related_name='+', on_delete=models.CASCADE)
+    updated_by = models.ForeignKey(
+        User, null=True, related_name='+', on_delete=models.CASCADE)
 
     def __str__(self):
         truncated_message = Truncator(self.message)

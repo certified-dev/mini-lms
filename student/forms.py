@@ -72,7 +72,8 @@ class StudentSignUpForm(UserCreationForm):
         if 'faculty' in self.data:
             try:
                 faculty_id = int(self.data.get('faculty'))
-                self.fields['department'].queryset = Department.objects.filter(faculty_id=faculty_id).order_by('name')
+                self.fields['department'].queryset = Department.objects.filter(faculty_id=faculty_id).exclude(
+                    name='General Studies').order_by('name')
             except (ValueError, TypeError):
                 pass  # invalid input from the client; ignore and fallback to empty department queryset
         elif self.instance.pk:
@@ -199,6 +200,10 @@ class TakeTmaForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+
     class Meta:
         model = Post
         fields = ['message', ]
+        widgets = {
+            'message': forms.Textarea(attrs={'rows': 8, 'placeholder': 'Enter your Question.'})
+        }

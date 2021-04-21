@@ -48,17 +48,17 @@ $(function () {
   
   $(".taken_tma_view").click(function(){
     var btn = $(this);
-$.ajax({
-  url: btn.attr("data-url"),
-  type: 'get',
-  dataType: 'json',
-  success: function (data) {
-      $("#modal-tma .modal-content").html(data.html_form);
-    $("#modal-tma").modal("show");
-    
-  }
-});
-});
+    $.ajax({
+      url: btn.attr("data-url"),
+      type: 'get',
+      dataType: 'json',
+      success: function (data) {
+          $("#modal-tma .modal-content").html(data.html_form);
+        $("#modal-tma").modal("show");
+
+      }
+    });
+    });
 
   /* Binding */
 

@@ -1,22 +1,24 @@
 <html>
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
     <style>
         body {
-        background-color: gray;
+        border:1px solid gray;
+        padding: 15px;
         }
     </style>
 </head>
 <body>
 <div class="container">
-<div class="card">
-<div class="card-body">
-<p class="mt-5"><strong>{{ user.username }} </strong></p>
-<p><strong>{{ user }}</strong></p>
-<p><strong>First Semester {% now "Y" %}</strong></p>
-<div class="text-center"><strong>Registered Courses</strong></div>
-<div class="table-responsive">
+    <div class="card">
+        <div class="card-body">
+            <p class="mt-5"><strong>{{ user.username }} </strong></p>
+            <p><strong>{{ user }}</strong></p>
+            <p><strong>First Semester {% now "Y" %}</strong></p>
+            <div class="text-center"><strong>Registered Courses</strong></div>
+            <div class="table-responsive">
                 <table class="table table-hover mb-0" id="dataTables-example" width="100%">
                     <thead>
                         <tr>
@@ -44,9 +46,15 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
 </div>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+  <strong></strong> 
 </div>
-    
-</div>
+
 </body>
 </html>

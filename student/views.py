@@ -14,16 +14,15 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.generic import CreateView, UpdateView, DetailView
+from django.views.generic import CreateView, UpdateView
 from django.views.generic import ListView
 from weasyprint import HTML
 
 from core.models import User, Tma, Expense, Course, Topic, Post, Session
 from mini_lms.decorators import student_required, anonymous_required
-from student.forms import StudentSignUpForm, CourseRegistrationForm, TakeTmaForm, PhotoUploadForm, PostForm, \
+from student.forms import StudentSignUpForm, CourseRegistrationForm, TakeTmaForm, PostForm, \
     ExamRegistrationForm
 from student.models import Student, TakenTma, Payment
-from student.tasks import today_date, first_sem_reg_start_date, second_sem_reg_start_date
 
 
 class PassRequestToFormMixin:
@@ -41,8 +40,6 @@ class StudentSignUpView(CreateView):
 
     def get_context_data(self, **kwargs):
         kwargs['user_type'] = 'student'
-        if today_date > first_sem_reg_start_date or today_date > second_sem_reg_start_date:
-            pass
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form):
@@ -76,22 +73,6 @@ def wallet(request):
     return render(request, 'student/wallet.html', {'payments': payments})
 
 
-# @method_decorator([login_required, student_required], name='dispatch')
-# class PhotoUpdateView(UpdateView):
-#     model = User
-#     form_class = PhotoUploadForm
-#     template_name = 'student/upload_photo.html'
-#     success_url = reverse_lazy('student:dashboard')
-
-#     def get_object(self):
-#         return self.request.user
-
-#     def form_valid(self, form):
-#         self.request.user.passport_uploaded = True
-#         messages.success(self.request, 'Photo uploaded Successfully!')
-#         return super().form_valid(form)
-
-
 def identity_card(request):
     response = HttpResponse(content_type='application/pdf;')
     response['Content-Disposition'] = 'inline; filename={username}-id-card.pdf'.format(username=request.user.username)
@@ -114,13 +95,22 @@ class SemesterRegisterView(ListView):
 
         if not self.request.user.student.paid_compulsory_fee:
             cost = Expense.objects.aggregate(Sum('amount'))['amount__sum']
-            extra_context = {'cost': cost, 'semester': True, 'reg_open': reg_open, 'session': active_session.title}
+            extra_context = {
+                'cost': cost,
+                'semester': True, 
+                'reg_open': reg_open, 
+                'session': active_session.title
+                }
             kwargs.update(extra_context)
         else:
-            cost = Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy']).aggregate(
-                Sum('amount'))[
-                'amount__sum']
-            extra_context = {'cost': cost, 'reg_open': reg_open, 'session': active_session.title, 'semester': True}
+            cost = Expense.objects.filter(name__in=['Semester Fee']).aggregate(
+                Sum('amount'))['amount__sum']
+            extra_context = {
+                'cost': cost,
+                'reg_open': reg_open,
+                'session': active_session.title,
+                'semester': True
+                   }
             kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
@@ -128,7 +118,8 @@ class SemesterRegisterView(ListView):
         if not self.request.user.student.paid_compulsory_fee:
             queryset = Expense.objects.all()
         else:
-            queryset = Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy'])
+            queryset = Expense.objects.filter(name__in=['Semester Fee'])
+            print(queryset)
         return queryset
 
 
@@ -142,7 +133,7 @@ def semester_payment(request):
             expenses = Expense.objects.all()
             semester_cost = expenses.aggregate(Sum('amount'))['amount__sum']
         else:
-            expenses = Expense.objects.filter(name__in=['Jamb Regularisation Fee', 'Examination Levy'])
+            expenses = Expense.objects.filter(name__in=['Semester Fee'])
             semester_cost = expenses.aggregate(Sum('amount'))['amount__sum']
 
         if not student.paid_compulsory_fee:
@@ -212,8 +203,9 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
     def form_valid(self, form):
         student = self.request.user.student
         courses_cost = student.courses.all().aggregate(Sum('fee'))['fee__sum']
-        student.wallet_balance += courses_cost
-        student.save()
+        if courses_cost:
+            student.wallet_balance += courses_cost 
+            student.save()
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -334,10 +326,10 @@ def take_tma(request, pk):
                 if student.get_unanswered_questions(tma).exists():
                     return redirect('student:take_tma', pk)
                 else:
-                    correct_answers = student.tma_answers.filter(answer__question__tma=tma,
-                                                                 answer__is_correct=True).count()
-                    incorrect_answers = student.tma_answers.filter(answer__question__tma=tma,
-                                                                   answer__is_correct=False).count()
+                    all_answers = student.tma_answers.filter(answer__question__tma=tma)
+                    correct_answers = all_answers.filter(answer__is_correct=True).count()
+                    incorrect_answers = all_answers.filter(answer__is_correct=False).count()
+
                     percentage = round((correct_answers / total_questions) * 100.0, 2)
                     TakenTma.objects.create(student=student,
                                             tma=tma,
@@ -345,34 +337,41 @@ def take_tma(request, pk):
                                             correct_answers=correct_answers,
                                             incorrect_answers=incorrect_answers,
                                             percentage=percentage)
+                    # tma_course = tma.course
+                    # courses = student.courses.all()
+                    
+                    # if '1' in tma.title:
+                    #     for course in courses:
+                    #         if course == tma_course:
+                    #             course.tma1_done = True
+                    #             course.save()                       
+                    # elif '2' in tma.title:
+                    #    for course in courses:
+                    #         if course == tma_course:
+                    #             course.tma2_done = True
+                    #             course.save()   
+                    # else:
+                    #    for course in courses:
+                    #         if course == tma_course:
+                    #             course.tma3_done = True
+                    #             course.save()   
 
-                    if '1' in tma.title:
-                        tma_course = tma.course
-                        course = student.courses.get(id=tma_course.id)
-                        course.tma1_done = True
-                        course.save()
+                    all_taken_tma = student.taken_tmas.all()
+                    recent = all_taken_tma.latest('date')
+                    truth_box = []
+                    for course in student.courses.all():
+                        for taken_tma in all_taken_tma:
+                            if course == taken_tma.tma.course:
+                                truth_box.append(True)
+                    
+                    print(truth_box)
+
+                    if False not in truth_box:
+                        student.tma_completed = True
                         student.save()
-
-                    elif '2' in tma.title:
-                        tma_course = tma.course
-                        course = student.courses.get(id=tma_course.id)
-                        course.tma2_done = True
-                        course.save()
-                        student.save()
-                    else:
-                        tma_course = tma.course
-                        course = student.courses.get(id=tma_course.id)
-                        course.tma3_done = True
-                        course.save()
-                        student.save()
-
-                    taken_tma = TakenTma.objects.order_by('id')[0]
-
-                    # student_takentma = TakenTma.objects.filter(student=request.user.student)
-                    # student_courses = student.courses.all()
 
                     messages.success(request,
-                                     taken_tma.tma.course.code + ' [' + taken_tma.tma.title + ']' + ' Completed!!!')
+                                     recent.tma.course.code + ' [' + recent.tma.title + ']' + ' Completed!!!')
                     return redirect('student:tma_list')
 
     else:
@@ -423,8 +422,9 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
     def form_valid(self, form):
         student = self.request.user.student
         exams_cost = student.exams.all().aggregate(Sum('fee'))['fee__sum']
-        student.wallet_balance += exams_cost
-        student.save()
+        if exams_cost:
+            student.wallet_balance += exams_cost
+            student.save()
         return super().form_valid(form)
 
     def form_invalid(self, form):

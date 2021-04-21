@@ -4,6 +4,14 @@
 
 {% block head_title %} Topic - Post | StudyWare Dashboard {% endblock %}
 
+{% block extra_css %}
+<link href="#" rel="stylesheet"/>
+{% endblock %}
+
+{% block js %}
+<script src="#"></script>
+{% endblock %}
+
 {% block content %}
  <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
@@ -49,14 +57,12 @@
              <small class="text-muted">{{ post.created_at|naturaltime }}</small>
            </div>
          </div>
-         {{ post.message.html|safe }}
+         {{ post.message }}
        </div>
      </div>
    {% endif %}
    {% endfor %}
    {% endif %}
-
-  
 
 {% endblock %}
 

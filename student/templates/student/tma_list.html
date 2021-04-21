@@ -4,7 +4,7 @@
 
 {% block head_title %} Assessment - T.M.A| StudyWare {% endblock %}
 
-{{ user.student.session }}
+{% block js %}<script src="{% static 'assets/js/tma.js' %}"></script>{% endblock %}
 
 {% block content %}
 

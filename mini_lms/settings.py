@@ -57,8 +57,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'widget_tweaks',
     'lecturer',
-    'floppyforms',
-    'django_quill'
+    'floppyforms'
 
 ]
 
@@ -192,7 +191,7 @@ EMAIL_HOST = 'localhost'
 
 EMAIL_PORT = 1025
 
-# CELERY 
+# Celery
 CELERY_BROKER_URL = 'redis://localhost:6379'
 
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
@@ -205,6 +204,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_TIMEZONE = 'Africa/Lagos'
 
+
+# Dashboard
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 
 ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'

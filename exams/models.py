@@ -29,6 +29,7 @@ class Answer(models.Model):
     def __str__(self):
         return self.text
 
+
 class TakenExam(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='taken_exams')
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='taken_exams')

@@ -7,7 +7,6 @@ from mini_lms.views import home, SignUpView, load_departments, upload_photo
 from lecturer.views import LecturerSignUpView
 from student.views import StudentSignUpView
 
-
 urlpatterns = [
     path('', home, name='home'),
     path('ajax/load-departments/', load_departments, name='ajax_load_departments'),
@@ -17,7 +16,7 @@ urlpatterns = [
     path('accounts/signup/lecturer/', LecturerSignUpView.as_view(), name='lecturer_signup'),
     path('student/', include('student.urls')),
     path('lecturer/', include('lecturer.urls')),
-    path('accounts/upload/photo' ,upload_photo, name="upload_photo"),
+    path('accounts/upload/photo/', upload_photo, name="upload_photo"),
     path('admin_tools/', include('admin_tools.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -93,9 +93,9 @@ def save_tma_form(request, form, template_name):
             tma_title = form.cleaned_data['title']
             tma_course = form.cleaned_data['course']
             check_tma = Tma.objects.filter(title=tma_title, course=tma_course).exists()
-            
+
             if check_tma:
-                data['form_is_valid'] = False              
+                data['form_is_valid'] = False
             else:
                 tma = form.save(commit=False)
                 tma.is_open = True
@@ -106,7 +106,7 @@ def save_tma_form(request, form, template_name):
                 data['html_tma_list'] = render_to_string('lecturer/includes/partial_tma_list.html', {
                     'tmas': Tma.objects.filter(admin=request.user.lecturer)
                 })
-                                           
+
         else:
             data['form_is_valid'] = False
     data['html_form'] = render_to_string(template_name, {'form': form}, request=request)
@@ -292,16 +292,17 @@ class ExamAddView(PassRequestToFormMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         lecturer_courses = Course.objects.filter(lecturer=self.request.user.lecturer).count()
-        exams_count = self.request.user.exams.count()
-        exams = Exam.objects.filter(admin=self.request.user)
+        exams_count = self.request.user.lecturer.exams.count()
+        exams = Exam.objects.filter(admin=self.request.user.lecturer)
         student_count = Student.objects.filter(exams__in=exams).count()
+
+        check = False
         if lecturer_courses == exams_count:
             check = True
-        else:
-            check = False
+
         extra_context = {
             'courses': Course.objects.filter(lecturer=self.request.user.lecturer).count(),
-            'exams': self.request.user.exams \
+            'exams': self.request.user.lecturer.exams \
                 .select_related('course') \
                 .annotate(questions_count=Count('questions', distinct=True)) \
                 .annotate(taken_count=Count('taken_exams', distinct=True)),
@@ -313,7 +314,7 @@ class ExamAddView(PassRequestToFormMixin, CreateView):
 
     def form_valid(self, form):
         exam = form.save(commit=False)
-        exam.admin = self.request.user
+        exam.admin = self.request.user.lecturer
         exam.save()
         messages.success(self.request, 'Exam added successfully.')
         return redirect('lecturer:exam_index')
@@ -337,7 +338,7 @@ class TopicListView(ListView):
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
-        
+
     def get_queryset(self):
         queryset = Topic.objects.filter(lecturer=self.request.user.lecturer).order_by('-last_updated').annotate(
             replies=Count('posts'))
@@ -395,6 +396,6 @@ class TopicUpdateView(UpdateView):
     def form_valid(self, form):
         topic = form.save(commit=False)
         topic.updated_at = timezone.now()
-        topic.save()       
+        topic.save()
         messages.success(self.request, 'Topic Updated Successfully!')
         return redirect('lecturer:topic_list')
