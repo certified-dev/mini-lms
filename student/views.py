@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.generic import CreateView, UpdateView
 from django.views.generic import ListView
 from weasyprint import HTML
@@ -23,6 +24,8 @@ from mini_lms.decorators import student_required, anonymous_required
 from student.forms import StudentSignUpForm, CourseRegistrationForm, TakeTmaForm, PostForm, \
     ExamRegistrationForm
 from student.models import Student, TakenTma, Payment
+
+from core.models import Question
 
 
 class PassRequestToFormMixin:
@@ -70,6 +73,9 @@ def dashboard(request):
 @student_required
 def wallet(request):
     payments = Payment.objects.filter(owner=request.user.student)
+    if request.method == 'POST':
+        rrr = request.POST.get('rrr')
+        print(rrr)
     return render(request, 'student/wallet.html', {'payments': payments})
 
 
@@ -97,10 +103,10 @@ class SemesterRegisterView(ListView):
             cost = Expense.objects.aggregate(Sum('amount'))['amount__sum']
             extra_context = {
                 'cost': cost,
-                'semester': True, 
-                'reg_open': reg_open, 
+                'semester': True,
+                'reg_open': reg_open,
                 'session': active_session.title
-                }
+            }
             kwargs.update(extra_context)
         else:
             cost = Expense.objects.filter(name__in=['Semester Fee']).aggregate(
@@ -110,7 +116,7 @@ class SemesterRegisterView(ListView):
                 'reg_open': reg_open,
                 'session': active_session.title,
                 'semester': True
-                   }
+            }
             kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
@@ -119,7 +125,6 @@ class SemesterRegisterView(ListView):
             queryset = Expense.objects.all()
         else:
             queryset = Expense.objects.filter(name__in=['Semester Fee'])
-            print(queryset)
         return queryset
 
 
@@ -204,7 +209,7 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
         student = self.request.user.student
         courses_cost = student.courses.all().aggregate(Sum('fee'))['fee__sum']
         if courses_cost:
-            student.wallet_balance += courses_cost 
+            student.wallet_balance += courses_cost
             student.save()
         return super().form_valid(form)
 
@@ -339,7 +344,7 @@ def take_tma(request, pk):
                                             percentage=percentage)
                     # tma_course = tma.course
                     # courses = student.courses.all()
-                    
+
                     # if '1' in tma.title:
                     #     for course in courses:
                     #         if course == tma_course:
@@ -363,7 +368,7 @@ def take_tma(request, pk):
                         for taken_tma in all_taken_tma:
                             if course == taken_tma.tma.course:
                                 truth_box.append(True)
-                    
+
                     print(truth_box)
 
                     if False not in truth_box:
@@ -371,8 +376,9 @@ def take_tma(request, pk):
                         student.save()
 
                     messages.success(request,
-                                     recent.tma.course.code + ' [' + recent.tma.title + ']' + ' Completed!!!')
-                    return redirect('student:tma_list')
+                                     'Congratulations! You completed %s - %s with success! You scored %s/%s' % (
+                                         recent.tma.course.code, recent.tma.title, correct_answers, total_questions))
+                    return redirect('student:tma_result', pk)
 
     else:
         form = TakeTmaForm(question=question)
@@ -386,6 +392,29 @@ def take_tma(request, pk):
         'answered_questions': total_questions - total_unanswered_questions,
         'total_questions': total_questions
     })
+
+
+@method_decorator([login_required, student_required], name='dispatch')
+class TmaResultsView(View):
+    template_name = 'student/tma_result.html'
+
+    def get(self, request, **kwargs):
+        tma = Tma.objects.get(id=kwargs['pk'])
+        taken_tma = TakenTma.objects.filter(student=request.user.student, tma=tma)
+        if not taken_tma:
+            """
+            Don't show the result if the user didn't attempted the tma
+            """
+            return render(request, '404.html')
+        questions = Question.objects.filter(tma=tma)
+
+        messages.success(request,
+                         taken_tma[0].tma.course.code + ' - ' + taken_tma[0].tma.title + ' Completed!!!')
+
+        # questions = self.form_class(initial=self.initial)
+        return render(request, self.template_name, {'questions': questions,
+                                                    'tma': tma,
+                                                    'percentage': taken_tma[0].percentage})
 
 
 def ajax_taken_tma(request, pk):

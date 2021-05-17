@@ -134,16 +134,13 @@ class ExamForm(forms.ModelForm):
 
 
 class NewTopicForm(forms.ModelForm):
-    subject = forms.CharField(required=True, widget=forms.TextInput(
+    subject = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Add Subject'}))
-    files = forms.FileField(required=False, widget=forms.FileInput())
+    files = forms.FileField(required=False)
 
     class Meta:
         model = Topic
         fields = ['subject', 'course', 'message', 'files']
-        widgets = {
-            'message': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Enter your Question.'})
-        }
 
     # Filter topic courses list for appointed lecturer
     def __init__(self, *args, **kwargs):
@@ -158,6 +155,3 @@ class UpdateTopicForm(forms.ModelForm):
     class Meta:
         model = Topic
         fields = ('subject', 'message', 'files')
-        widgets = {
-            'message': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Enter your Question.'})
-        }

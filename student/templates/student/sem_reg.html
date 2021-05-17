@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="{% url 'student:dashboard' %}" class="btn btn-danger">Close</a>
+                <a href="{% url 'student:dashboard' %}" class="btn btn-danger"><span class="fas fa-cross"></span>Close</a>
                 {% if user.student.wallet_balance < cost %}
                 <a href="{% url 'student:wallet' %}" class="btn btn-primary"><span class="fas fa-credit-card"></span> Refill Wallet</a>
                 {% else %}

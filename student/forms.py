@@ -102,7 +102,7 @@ class StudentSignUpForm(UserCreationForm):
         department = self.cleaned_data.get('department')
         # Create student object with user id
         Student.objects.create(user=user, study_centre=study_centre, programme=programme,
-                               department=department)
+                               department=department, level=100)
         return user
 
 
@@ -200,10 +200,9 @@ class TakeTmaForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-
     class Meta:
         model = Post
         fields = ['message', ]
         widgets = {
-            'message': forms.Textarea(attrs={'rows': 8, 'placeholder': 'Enter your Question.'})
+            'message': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Enter your Question.'})
         }

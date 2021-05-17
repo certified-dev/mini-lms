@@ -8,13 +8,7 @@ from django.utils.text import Truncator
 
 from lecturer.models import Lecturer
 
-LEVEL = (
-    ('Access', 'Access'),
-    ('100', '100'),
-    ('200', '200'),
-    ('300', '300'),
-    ('400', '400')
-)
+from markdown2 import markdown
 
 STATES = (
     ('------', '------'),
@@ -34,7 +28,15 @@ def user_topic_directory_path(instance, filename):
     return 'user_{0}/{1}/{2}'.format(instance.lecturer.user.username, 'topic', filename)
 
 
+class Semester(models.Model):
+    title = models.CharField(max_length=10, null=True)
+
+    def __str__(self):
+        return self.title
+
+
 class Session(models.Model):
+    semester = models.OneToOneField(Semester, on_delete=models.CASCADE)
     title = models.CharField(max_length=10)
     start_date = models.DateField()
     close_date = models.DateField()
@@ -103,13 +105,6 @@ class Programme(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Semester(models.Model):
-    title = models.CharField(max_length=10, null=True)
-
-    def __str__(self):
-        return self.title
 
 
 class Course(models.Model):
@@ -195,7 +190,7 @@ class Answer(models.Model):
 
 class Topic(models.Model):
     subject = models.CharField(max_length=255)
-    message = models.CharField(max_length=100000)
+    message = models.TextField(max_length=100000)
     files = models.FileField(
         upload_to=user_topic_directory_path, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now_add=True)
@@ -229,9 +224,12 @@ class Topic(models.Model):
     def get_last_ten_posts(self):
         return self.posts.order_by('-created_at')[:10]
 
+    def get_message_as_markdown(self):
+        return mark_safe(markdown(self.message, safe_mode='escape'))
+
 
 class Post(models.Model):
-    message = models.CharField(max_length=100000)
+    message = models.TextField(max_length=100000)
     topic = models.ForeignKey(
         Topic, related_name='posts', on_delete=models.CASCADE)
     created_by = models.ForeignKey(
@@ -244,3 +242,6 @@ class Post(models.Model):
     def __str__(self):
         truncated_message = Truncator(self.message)
         return truncated_message.chars(30)
+
+    def get_message_as_markdown(self):
+        return mark_safe(markdown(self.message, safe_mode='escape'))

@@ -18,7 +18,7 @@
   <div class="card-title py-2 px-3 m-0"><strong>{{ topic.subject|capfirst }}</strong> <small class="text-muted float-right">{{ topic.added_on|naturaltime }}</small></div>
     <div class="card-body pb-2 pt-1">
     
-      <p class="card-text"><div class="container p-0">{{ topic.message }}</div></p>
+      <p class="card-text"><div class="container p-0">{{ topic.get_message_as_markdown }}</div></p>
       <div class="row">
       <div class="col-2">
          <a href="{% url 'student:reply_topic' topic.pk %}" class="btn btn-primary btn-sm mt-2" role="button">Reply</a>
@@ -38,7 +38,7 @@
         <strong>{{ topic.subject|capfirst }}</strong><small class="text-muted float-right pt-1">{{ topic.added_on|naturaltime }}</small>
       </div>
       <div class="col-12">
-        {{ topic.message }}
+        {{ topic.get_message_as_markdown }}
       </div>
       <div class="col-12">
          <a href="{% url 'student:reply_topic' topic.pk %}" >Reply</a>
@@ -66,9 +66,9 @@
               <small class="text-muted">{{ post.created_at|naturaltime }}</small>
             </div>
           </div>
-          {{ post.message }}
+          {{ post.get_message_as_markdown }}
         </div>
-        
+
         {% if post.created_by == user %}
           <div class="col-12 text-right">
             <span><a href="{% url 'student:edit_post' post.topic.pk post.pk %}" >edit</a>  <a href="#" class="text-danger ml-3">delete</a> </span>
@@ -82,7 +82,7 @@
     <div class="container p-2 border-bottom mobile mb-2">  
       <div class="row">
         <div class="col-12">
-          {{ post.message }}
+          {{ post.get_message_as_markdown }}
         </div>
         <div class="col-12">
           <img src="{{ post.created_by.photo.url }}" alt="{{ post.created_by.username }}" width="20" height="20" class="rounded-circle mr-1">

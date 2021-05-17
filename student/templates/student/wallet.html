@@ -52,12 +52,12 @@
         	</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label data-toggle="tooltip" title="" data-original-title="3 digits code on back side of the card">CVV <i class="fa fa-question-circle"></i></label>
-            <input class="form-control" required="" type="text">
-        </div> <!-- form-group.// -->
-    </div>
+<!--    <div class="col-md-3">-->
+<!--        <div class="form-group">-->
+<!--            <label data-toggle="tooltip" title="" data-original-title="3 digits code on back side of the card">CVV <i class="fa fa-question-circle"></i></label>-->
+<!--            <input class="form-control" required="" type="text">-->
+<!--        </div> &lt;!&ndash; form-group.// &ndash;&gt;-->
+<!--    </div>-->
 </div> <!-- row.// -->
 
 
@@ -80,51 +80,54 @@
                     </button>
             </div>
             <div class="modal-body">
+                <form id="rrr_form" method="post" novalidate>
+                    {% csrf_token %}
                 <div class="form-group">
                   <label for="rrr">RRR No</label>
-                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
+                  <input type="text" class="form-control" name="rrr" id="rrr" aria-describedby="helpId" placeholder="">
                   <small id="helpId" class="form-text text-muted">Help text</small>
                 </div>
+                    </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Credit</button>
+                <button type="submit" form="rrr_form" class="btn btn-primary">Credit</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="RRRModal1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Generate RRR</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                  <label for="rrr">Amount</label>
-                    	<i class="fas fa-bill"></i>
-                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
-                  <small id="helpId" class="form-text text-muted">Help text</small>
-                </div>
+<!--<div class="modal fade" id="RRRModal1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">-->
+<!--    <div class="modal-dialog" role="document">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h5 class="modal-title">Generate RRR</h5>-->
+<!--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                        <span aria-hidden="true">&times;</span>-->
+<!--                    </button>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div class="form-group">-->
+<!--                  <label for="rrr">Amount</label>-->
+<!--                    	<i class="fas fa-bill"></i>-->
+<!--                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">-->
+<!--                  <small id="helpId" class="form-text text-muted">Help text</small>-->
+<!--                </div>-->
 
-                <div class="form-group">
-                  <label for="rrr">Description</label>
-                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
-                  <small id="helpId" class="form-text text-muted">Help text</small>
-                </div>
+<!--                <div class="form-group">-->
+<!--                  <label for="rrr">Description</label>-->
+<!--                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">-->
+<!--                  <small id="helpId" class="form-text text-muted">Help text</small>-->
+<!--                </div>-->
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Generate</button>
-            </div>
-        </div>
-    </div>
-</div>
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+<!--                <button type="button" class="btn btn-primary">Generate</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
@@ -142,20 +145,13 @@
            <div class="card-footer">
                 <div class="row">
                     <div class="col">
-                        <div class="dropdown open">
-                           <button class="btn btn-secondary dropdown-toggle" type="button" id="triggerId" data-toggle="dropdown-menu" aria-haspopup="true"
-                           aria-expanded="false">
-                             Credit Wallet
-                           </button>
-                           <div class="dropdown-menu" aria-labelledby="triggerId">
-                           <button class="dropdown-item" data-toggle="modal" data-target="#CCModal">Debit/Credit Card</button>
-                           <button class="dropdown-item" data-toggle="modal" data-target="#RRRModal">Credit RRR</button>
-                          </div>
-                        </div>
+                        <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#CCModal">Card TopUp</button>
+<!--                        <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#RRRModal">Credit RRR</button>-->
                     </div>
                     <div class="col">
-                 <button type="button" data-toggle="modal" data-target="#RRRModal1" class="btn btn-primary btn-block">RRR</button>
-                 </div>
+                       <button type="button" data-toggle="modal" data-target="#RRRModal" class="btn btn-primary btn-block">RRR TopUp</button>
+                    </div>
+
                </div>
                 
             </div>

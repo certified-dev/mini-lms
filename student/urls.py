@@ -19,6 +19,7 @@ urlpatterns = [
     path('project/', views.StudentProjectsView.as_view(), name='project'),
     path('tma/', views.TmaListView.as_view(), name='tma_list'),
     path('tma/<int:pk>/', views.take_tma, name='take_tma'),
+    path('tma/taken/<int:pk>/result/', views.TmaResultsView.as_view(), name='tma_result'),
     path('taken_tma/<int:pk>/', views.ajax_taken_tma, name='ajax_tma_result'),
     path('exam/register/', views.ExamRegistrationView.as_view(), name='exam_reg'),
     path('exam/pay/', views.exam_payment, name='exam_pay'),

@@ -5,11 +5,14 @@
 {% block head_title %} Topic | StudyWare {% endblock %}
 
 {% block extra_css %}
-<link href="#" rel="stylesheet"/>
+<link href="{% static 'assets/vendor/simplemde/simplemde.min.css' %}" rel="stylesheet"/>
 {% endblock %}
 
 {% block js %}
-<script src="#"></script>
+<script src="{% static 'assets/vendor/simplemde/simplemde.min.js' %}"></script>
+<script>
+   var simplemde = new SimpleMDE({forceSync: true})
+ </script>
 {% endblock %}
 
 {% block content %}
@@ -37,9 +40,17 @@
     </div>
 
     {% if 'edit' in request.path %}
-     <div class="form-group col-md-6 mb-0">
-       {{ form.files|as_crispy_field }}
-     </div>
+      <div class="row pl-2 pr-2">
+        <div class="form-group col-md-6 mb-0">
+          {{ form.files|as_crispy_field }}
+        </div>
+        <div class="form-group col-md-3 mt-md-4 pl-md-5 mb-md-2 pt-md-2">
+           <button type="submit" class="btn btn-block btn-success">Save changes</button>
+        </div>
+        <div class="form-group col-md-3 mt-md-4 mb-md-2 pr-md-5 pt-md-2">
+           <a href="{% url 'lecturer:topic_list' %}" class="btn btn-block btn-outline-secondary" role="button">Nevermind</a>
+        </div>
+    </div>
     {% else %}
     <div class="form-row pl-2 pr-2">
       <div class="form-group col-md-4 mb-0">
@@ -52,13 +63,18 @@
     {% endif %}
 
     
-    {% if 'edit' in request.path %}
-      <button type="submit" class="btn btn-success">Save changes</button>
-    {% else %}
-    <button type="submit" class="btn btn-success">Post</button>
+    {% if 'edit' not in request.path %}
+      <div class="row pl-2 pr-2">
+          <div class="form-group col-md-5">
+           <button type="submit" class="btn btn-block btn-success">Save</button>
+        </div>
+        <div class="form-group col-md-5 pl-md-5 ml-md-5 pr-md-0">
+           <a href="{% url 'lecturer:topic_list' %}" class="btn btn-block btn-outline-secondary" role="button">Nevermind</a>
+        </div>
+      </div>
     {% endif %}
     
-    <a href="{% url 'lecturer:topic_list' %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+
   </form>
   </div>
 

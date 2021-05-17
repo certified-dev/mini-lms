@@ -5,11 +5,14 @@
 {% block head_title %} Topic - Post | StudyWare Dashboard {% endblock %}
 
 {% block extra_css %}
-<link href="#" rel="stylesheet"/>
+<link href="{% static 'assets/vendor/simplemde/simplemde.min.css' %}" rel="stylesheet"/>
 {% endblock %}
 
 {% block js %}
-<script src="#"></script>
+<script src="{% static 'assets/vendor/simplemde/simplemde.min.js' %}"></script>
+<script>
+   var simplemde = new SimpleMDE({forceSync: true})
+ </script>
 {% endblock %}
 
 {% block content %}
@@ -57,7 +60,7 @@
              <small class="text-muted">{{ post.created_at|naturaltime }}</small>
            </div>
          </div>
-         {{ post.message }}
+         {{ post.get_message_as_markdown }}
        </div>
      </div>
    {% endif %}

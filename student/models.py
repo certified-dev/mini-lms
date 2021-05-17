@@ -2,7 +2,16 @@ from django.conf import settings
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from core.models import Course, Studycentre, Programme, Tma, Answer, Department, LEVEL
+from core.models import Course, Studycentre, Programme, Tma, Answer, Department
+
+
+LEVEL = (
+    ('Access', 'Access'),
+    ('100', '100'),
+    ('200', '200'),
+    ('300', '300'),
+    ('400', '400')
+)
 
 
 class Student(models.Model):

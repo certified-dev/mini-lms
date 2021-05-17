@@ -1,14 +1,30 @@
+import sys
+from PIL import Image
+from io import BytesIO
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.http.response import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from core.models import Department
 from mini_lms.decorators import anonymous_required
 
 User = get_user_model()
+
+
+def compress(file):
+    temp_image = Image.open(file)
+    outputIoStream = BytesIO()
+    resized_temp_image = temp_image.resize((1100, 1000))
+    resized_temp_image.save(outputIoStream, format='JPEG', quality=60)
+    outputIoStream.seek(0)
+    final_image = InMemoryUploadedFile(outputIoStream, 'ImageField', "%s.jpg" % file.name.split('.')[0],
+                                       'image/jpeg', sys.getsizeof(outputIoStream), None)
+    return final_image
 
 
 class UploadPhotoForm(forms.Form):
@@ -41,7 +57,7 @@ def upload_photo(request):
         item = request.FILES.get('photo')
         if item:
             user = request.user
-            user.photo = item
+            user.photo = compress(item)
             user.passport_uploaded = True
             user.save()
             return JsonResponse({'message': 'Uploaded Success!!!'})
