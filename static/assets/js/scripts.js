@@ -328,8 +328,44 @@ $(document).ready(function () {
 
   }
 
-});
+  $("#rrr").keyup(function (){
+     if ($(this).val().length < 12) {
+      $(this).addClass("is-invalid");
+      $(this).removeClass("is-valid");
+     } else {
+      $(this).removeClass("is-invalid");
+       $(this).addClass("is-valid");
+     }
+  });
 
+  $("#rrr_submit").click(function (e) {
+     const used_topup = JSON.parse(document.getElementById('topup_used').textContent);
+     var rrr = $("#rrr").val();
+
+     if (rrr) {
+          if (rrr.length < 12) {
+             alert('enter complete 12 digit rrr code');
+          } else {
+
+           if (Number(rrr) === 128709876406) {
+                 if (used_topup) {
+                 alert("RRR Code Has Been Used");
+                  } else{
+                     $("#rrr_form").submit();
+                  }
+
+               } else {
+                alert('invalid rrr code, check and try again');
+               }
+
+           }
+     } else {
+        alert('enter a valid RRR Code');
+     }
+
+  });
+
+});
 
 
 (function ($) {

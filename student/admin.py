@@ -1,10 +1,11 @@
 from django.contrib import admin
 
-from student.models import Payment, Student, TakenTma, StudentAnswer
+from student.models import Student, TakenTma, StudentAnswer, CreditTransaction, DebitTransaction
 
 admin.site.register(TakenTma)
 admin.site.register(StudentAnswer)
-admin.site.register(Payment)
+admin.site.register(CreditTransaction)
+admin.site.register(DebitTransaction)
 
 
 class StudentAdmin(admin.ModelAdmin):

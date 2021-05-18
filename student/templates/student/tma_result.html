@@ -4,8 +4,12 @@
 
 {% block head_title %} Assessment - T.M.A| StudyWare {% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.core.css' %}">
+<link rel="stylesheet" href="{% static 'assets/vendor/mathlive/mathlive.css' %}">
+{% endblock %}
 
+{% block content %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
         <li class="breadcrumb-item">Assessment</li>
@@ -52,4 +56,9 @@
 <div class="text-center mb-2">
     <a class="btn btn-outline-primary" href="{% url 'student:tma_list' %}"><i class="fas fa-list"></i> Back to TMA List</a>
 </div>
+
+<script type="module">
+ import MathLive from '{% static 'assets/vendor/mathlive/mathlive.mjs' %}';
+  MathLive.renderMathInDocument();
+</script>
 {% endblock %}

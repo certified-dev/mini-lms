@@ -23,9 +23,13 @@ from core.models import User, Tma, Expense, Course, Topic, Post, Session
 from mini_lms.decorators import student_required, anonymous_required
 from student.forms import StudentSignUpForm, CourseRegistrationForm, TakeTmaForm, PostForm, \
     ExamRegistrationForm
-from student.models import Student, TakenTma, Payment
+from student.models import Student, TakenTma
 
 from core.models import Question
+
+from student.models import CreditTransaction, DebitTransaction
+
+RRR_TopUp = 128709876406
 
 
 class PassRequestToFormMixin:
@@ -72,11 +76,21 @@ def dashboard(request):
 @login_required
 @student_required
 def wallet(request):
-    payments = Payment.objects.filter(owner=request.user.student)
+    student = request.user.student
+    debit_payments = DebitTransaction.objects.filter(payer=student)
+    deposit_payments = CreditTransaction.objects.filter(payer=student)
+
     if request.method == 'POST':
-        rrr = request.POST.get('rrr')
-        print(rrr)
-    return render(request, 'student/wallet.html', {'payments': payments})
+        rrr = int(request.POST.get('rrr'))
+        if rrr == RRR_TopUp:
+            student.wallet_balance += 20000
+            student.used_topup = True
+            student.save()
+
+            CreditTransaction.objects.create(payer=student, type='RRR', transaction_id=rrr, amount=20000)
+
+    return render(request, 'student/wallet.html', {'debit_payments': debit_payments,
+                                                   'deposit_payments': deposit_payments})
 
 
 def identity_card(request):
@@ -148,9 +162,9 @@ def semester_payment(request):
         student.wallet_balance = student.wallet_balance - semester_cost
 
         for item in expenses:
-            Payment.objects.create(
-                owner=request.user.student,
-                description="Semester",
+            DebitTransaction.objects.create(
+                payer=student,
+                description="Semester Reg",
                 title=item.name,
                 cost=item.amount)
 
@@ -182,9 +196,9 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
             reg_open = False
 
         if '/1' in active_session.title:
-            session = 1
+            session = "1st"
         elif '/2' in active_session.title:
-            session = 2
+            session = "2nd"
 
         courses = Course.objects.filter(semester__title=session, host_faculty=self.request.user.faculty)
         others = Course.objects.filter(host_faculty__name="General Studies", semester__title=session)
@@ -228,9 +242,9 @@ def course_payment(request):
         student.save()
 
         for item in student.courses.all():
-            if not Payment.objects.filter(title=item.code).exists():
-                Payment.objects.create(
-                    owner=request.user.student,
+            if not DebitTransaction.objects.filter(title=item.code).exists():
+                DebitTransaction.objects.create(
+                    payer=student,
                     description="Course",
                     title=item.code,
                     cost=item.fee)
@@ -470,9 +484,9 @@ def exam_payment(request):
         student.wallet_balance = student.wallet_balance - exam_cost
 
         for item in student.exams.all():
-            if not Payment.objects.filter(title=item.course).exists():
-                Payment.objects.create(
-                    owner=request.user.student,
+            if not DebitTransaction.objects.filter(title=item.course).exists():
+                DebitTransaction.objects.create(
+                    payer=student,
                     description="Exam",
                     title=item.course,
                     cost=item.fee)

@@ -80,54 +80,62 @@
                     </button>
             </div>
             <div class="modal-body">
-                <form id="rrr_form" method="post" novalidate>
+                <form id="rrr_form" method="post">
                     {% csrf_token %}
-                <div class="form-group">
-                  <label for="rrr">RRR No</label>
-                  <input type="text" class="form-control" name="rrr" id="rrr" aria-describedby="helpId" placeholder="">
-                  <small id="helpId" class="form-text text-muted">Help text</small>
-                </div>
-                    </form>
+                    <div class="form-group">
+                      <label for="rrr">RRR</label>
+                      <input type="number" class="form-control" name="rrr" id="rrr" aria-describedby="helpId" placeholder="000000000000">
+                      <small id="helpId" class="form-text text-muted">enter your 12 digit rrr code from remita</small>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" form="rrr_form" class="btn btn-primary">Credit</button>
+                <button type="button" id="rrr_submit" class="btn btn-primary">Credit</button>
             </div>
         </div>
     </div>
 </div>
 
-<!--<div class="modal fade" id="RRRModal1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">-->
-<!--    <div class="modal-dialog" role="document">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header">-->
-<!--                <h5 class="modal-title">Generate RRR</h5>-->
-<!--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                        <span aria-hidden="true">&times;</span>-->
-<!--                    </button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                <div class="form-group">-->
-<!--                  <label for="rrr">Amount</label>-->
-<!--                    	<i class="fas fa-bill"></i>-->
-<!--                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">-->
-<!--                  <small id="helpId" class="form-text text-muted">Help text</small>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                  <label for="rrr">Description</label>-->
-<!--                  <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="">-->
-<!--                  <small id="helpId" class="form-text text-muted">Help text</small>-->
-<!--                </div>-->
-
-<!--            </div>-->
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-<!--                <button type="button" class="btn btn-primary">Generate</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
+<div class="modal fade" id="TrancModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Recent Transactions</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+            </div>
+            <div class="modal-body">
+                 <table class="table table-sm mb-1">
+            <thead>
+                <tr>
+                    <th class="text-center">S/N</th>
+                    <th class="text-center">Title</th>
+                    <th class="text-center">Type</th>
+                    <th class="text-center">Cost</th>
+                    <th class="text-center">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in payments %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td class="text-center">{{ transaction.title }}</td>
+                    <td class="text-center">{{ transaction.description }}</td>
+                    <td class="text-center">₦{{ transaction.cost|intcomma }}</td>
+                    <td class="text-center">{{ transaction.date|naturaltime }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
@@ -136,11 +144,26 @@
     </ol>
 </nav>
 
+{% if not user.student.used_topup %}
+<div class="alert alert-info" role="alert">
+   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+    </button>
+    <i class="fas fa-info-circle" aria-hidden="true"></i>
+    <strong>Free Top</strong>
+    <p>Use the following RRR Code to topup your wallet with ₦20,000:  <b>128709876406</b>
+        <br>
+        <small><b>N:B</b> you can only use this code once</small>
+    </p>
+</div>
+{% endif %}
+
+
 <div class="row mb-1">
     <div class="col-md-4 col-lg-4 mb-3">
         <div class="card">
             <div class="text-center mt-5 mb-5">
-            Naira:<div class="text-danger"><h1><strong>{{ user.student.wallet_balance|intcomma}}</strong></h1></div>
+            Balance:<div class="text-danger"><h1><strong>₦ {{ user.student.wallet_balance|intcomma}}</strong></h1></div>
            </div>
            <div class="card-footer">
                 <div class="row">
@@ -160,7 +183,7 @@
         <div class="card mt-2">
         <div class="card-header">Recent Deposit </div>
         <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm mb-0">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -169,16 +192,17 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for transaction in deposit_payments %}
                     <tr>
-                        <td>RRR</td>
-                        <td>5552-0978-7654-54</td>
-                        <td>₦30,000</td>
+                        <td class="text-center">{{ transaction.type }}</td>
+                        <td class="text-center">{{ transaction.transaction_id }}</td>
+                        <td class="text-center">₦{{ transaction.amount|intcomma }}</td>
                     </tr>
+                    {% empty %}
                     <tr>
-                        <td>CC</td>
-                        <td>CR458-UT098-867</td>
-                        <td>₦10,500</td>
+                        <td class="bg-light text-center font-italic p-2" colspan="12">No recorded transaction.</td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             </div>
@@ -186,7 +210,7 @@
     </div>
     <div class="col-md-8 col-lg-8">
         <div class="card">
-            <div class="card-header pl-2"><span class="fas fa-stopwatch mr-2 text-muted"></span> Recent transactions</div>
+            <div class="card-header pl-2"><span class="fas fa-stopwatch mr-2 text-muted"></span> Recent Purchases</div>
             <div class="table-responsive">
             <table class="table table-sm mb-1">
             <thead>
@@ -199,23 +223,30 @@
                 </tr>
             </thead>
             <tbody>
-                {% for transaction in payments %}
-                <tr> 
+                {% for transaction in debit_payments %}
+                <tr>
                     <td class="text-center">{{ forloop.counter }}</td>
                     <td class="text-center">{{ transaction.title }}</td>
                     <td class="text-center">{{ transaction.description }}</td>
                     <td class="text-center">₦{{ transaction.cost|intcomma }}</td>
-                    <td class="text-center">{{ transaction.date|naturaltime }}</td>
-                </tr> 
+                    <td class="text-center">{{ transaction.payment__date|naturaltime }}</td>
+                </tr>
                 {% empty %}  
                 <tr> 
                     <td class="bg-light text-center font-italic p-2" colspan="12">No recorded transaction.</td>          
                 </tr> 
                 {% endfor %}
             </tbody>
-        </table>
+            </table>
+                {% if debit_payments.count > 1 %}
+                <div class="card-footer">
+                    <button type="button" data-toggle="modal" data-target="#TrancModal" class="btn btn-sm btn-secondary" data-dismiss="modal">Show more</button>
+                </div>
+                {% endif %}
         </div>
        </div>
     </div>
 </div>
+
+{{ user.student.used_topup|json_script:"topup_used" }}
 {% endblock %}

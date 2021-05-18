@@ -204,7 +204,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_TIMEZONE = 'Africa/Lagos'
 
-
 # Dashboard
 ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 
@@ -281,8 +280,9 @@ FLUENT_DASHBOARD_APP_GROUPS = (
     }),
     ('Others', {
         'models': (
-            'student.models.Payment',
             'core.models.Expense',
+            'student.models.DebitTransaction',
+            'student.models.CreditTransaction',
             'core.models.Studycentre',
         ),
     }),

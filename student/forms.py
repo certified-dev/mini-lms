@@ -127,9 +127,9 @@ class CourseRegistrationForm(forms.ModelForm):
         active_session = Session.objects.get(active=True)
 
         if '/1' in active_session.title:
-            session = 1
+            session = "1st"
         elif '/2' in active_session.title:
-            session = 2
+            session = "2nd"
 
         courses = Course.objects.filter(semester__title=session, host_faculty=self.request.user.faculty)
         others = Course.objects.filter(host_faculty__name="General Studies", semester__title=session)
