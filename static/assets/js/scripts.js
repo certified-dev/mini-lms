@@ -162,7 +162,8 @@ $(document).ready(function () {
           confirmButtonText: 'Upload',
           cancelButtonText: 'Cancel',
           confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33'
+          cancelButtonColor: '#d33',
+          backdrop: false
         })
 
         if (photo) {

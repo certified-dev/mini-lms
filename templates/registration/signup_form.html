@@ -16,8 +16,8 @@
 
 <div class="row justify-content-center">
 	<aside class="col-sm-5 mt-3">
-		<div class="card">
-			<form role="form" action="" id="userForm" role="form" data-departments-url="{% url 'ajax_load_departments' %}" method="post" class="registration-form" novalidate>
+		<div class="card mb-2">
+			<form role="form" action="" id="userForm" role="form" data-programmes-url="{% url 'ajax_load_programmes' %}" data-departments-url="{% url 'ajax_load_departments' %}" method="post" class="registration-form" novalidate>
 				<fieldset>
 					<div class="form-top">
 						<div class="form-top-left">
@@ -147,6 +147,22 @@
         },
         success: function (data) {
           $("#id_department").html(data);
+        }
+      });
+
+    });
+
+    $("#id_department").change(function () {
+      var url = $("#userForm").attr("data-programmes-url");
+      var departmentId = $(this).val();
+
+      $.ajax({
+        url: url,
+        data: {
+          'department': departmentId
+        },
+        success: function (data) {
+          $("#id_programme").html(data);
         }
       });
 

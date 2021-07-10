@@ -88,6 +88,7 @@ def wallet(request):
             student.save()
 
             CreditTransaction.objects.create(payer=student, type='RRR', transaction_id=rrr, amount=20000)
+            messages.success(request, 'Wallet successfully credited with ₦20,000!!!')
 
     return render(request, 'student/wallet.html', {'debit_payments': debit_payments,
                                                    'deposit_payments': deposit_payments})
@@ -119,7 +120,7 @@ class SemesterRegisterView(ListView):
                 'cost': cost,
                 'semester': True,
                 'reg_open': reg_open,
-                'session': active_session.title
+                'session': active_session.semester.title
             }
             kwargs.update(extra_context)
         else:
@@ -128,7 +129,7 @@ class SemesterRegisterView(ListView):
             extra_context = {
                 'cost': cost,
                 'reg_open': reg_open,
-                'session': active_session.title,
+                'session': active_session.semester.title,
                 'semester': True
             }
             kwargs.update(extra_context)
@@ -190,18 +191,17 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         active_session = Session.objects.get(active=True)
+        session, reg_open = '', ''
         if date.today() < active_session.registration_end:
             reg_open = True
-        else:
-            reg_open = False
 
-        if '/1' in active_session.title:
-            session = "1st"
-        elif '/2' in active_session.title:
-            session = "2nd"
+        if '1' in active_session.semester.title:
+            session = "1"
+        elif '2' in active_session.semester.title:
+            session = "2"
 
-        courses = Course.objects.filter(semester__title=session, host_faculty=self.request.user.faculty)
-        others = Course.objects.filter(host_faculty__name="General Studies", semester__title=session)
+        courses = Course.objects.filter(semester__title__icontains=session, host_faculty=self.request.user.faculty)
+        others = Course.objects.filter(host_faculty__name="General Studies", semester__title__icontains=session)
 
         student_courses = list(self.request.user.student.courses.all().values_list('code', flat=True))
         reg_check = self.request.user.student.courses.aggregate(Sum('credit_unit'))['credit_unit__sum']
@@ -209,7 +209,7 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
         extra_context = {
             'semester_courses': courses | others,
             'reg_check': reg_check,
-            'session': active_session.title,
+            'session': active_session.semester.title,
             'student_courses': student_courses,
             'reg_open': reg_open
         }
@@ -273,7 +273,7 @@ class StudentCoursesView(ListView):
         active_session = Session.objects.get(active=True)
         extra_context = {
             'check': check,
-            'session': active_session.title,
+            'session': active_session.semester.title,
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -454,7 +454,7 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
         student_exams = list(self.request.user.student.exams.all().values_list('course__code', flat=True))
         extra_context = {
             'student_exams': student_exams,
-            'session': active_session.title,
+            'session': active_session.semester.title,
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)

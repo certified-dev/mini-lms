@@ -12,8 +12,23 @@ from markdown2 import markdown
 
 STATES = (
     ('------', '------'),
-    ('Lagos', 'Lagos'),
+    ('Abia', 'Abia'),
+    ('Adamawa', 'Adamawa'),
+    ('Akwa Ibom', 'Akwa ibom'),
+    ('Anambra', 'Anambra'),
+    ('Bauchi', 'Bauchi'),
+    ('Benue', 'Benue'),
+    ('Borno', 'Borno'),
+    ('Cross River', 'Cross River'),
+    ('Delta', 'Delta'),
+    ('Ebonyi', 'Ebonyi'),
     ('Edo', 'Edo'),
+    ('Enugu', 'Enugu'),
+    ('Imo', 'Imo'),
+    ('Plateau', 'Plateau'),
+    ('Rivers', 'Rivers'),
+    ('Lagos', 'Lagos'),
+    ('Taraba', 'Taraba'),
     ('Abuja', 'Abuja'),
     ('Yola', 'Yola'),
 
@@ -37,14 +52,13 @@ class Semester(models.Model):
 
 class Session(models.Model):
     semester = models.OneToOneField(Semester, on_delete=models.CASCADE)
-    title = models.CharField(max_length=10)
     start_date = models.DateField()
     close_date = models.DateField()
     registration_end = models.DateField()
     active = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title
+        return self.semester.title
 
 
 class Faculty(models.Model):
@@ -63,8 +77,6 @@ class Department(models.Model):
     name = models.CharField(max_length=50)
     faculty = models.ForeignKey(
         Faculty, on_delete=models.CASCADE, related_name='dept_faculty')
-    programme = models.ManyToManyField(
-        settings.PROG_MODEL, related_name='student_program', blank=True)
 
     def __str__(self):
         return self.name
@@ -75,7 +87,7 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to=user_directory_path, default='placeholder/image.jpeg')
     phone = models.CharField(max_length=15, null=True, blank=True)
-    birth_date = models.DateField(blank=True, null=True)
+    birth_date = models.DateField()
     address = models.CharField(max_length=100, blank=True)
     birth_place = models.CharField(
         max_length=50, choices=STATES, default='Unknown')
@@ -95,13 +107,14 @@ class User(AbstractUser):
         return full_name.strip()
 
     def photo_tag(self):
-        return mark_safe('<img src="%s" width="70px" height="70px" />' % self.photo.url)
+        return mark_safe('<img src="%s" width="35px" height="35px" />' % self.photo.url)
 
     photo_tag.short_description = 'Photo'
 
 
 class Programme(models.Model):
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=50)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='program_department')
 
     def __str__(self):
         return self.name

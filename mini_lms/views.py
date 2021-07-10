@@ -10,8 +10,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from core.models import Department
+from core.models import Department, Programme
 from mini_lms.decorators import anonymous_required
+
 
 User = get_user_model()
 
@@ -49,7 +50,13 @@ def home(request):
 def load_departments(request):
     faculty_id = request.GET.get('faculty')
     departments = Department.objects.filter(faculty_id=faculty_id).order_by('name')
-    return render(request, 'includes/department_dropdown_list_options.html', {'departments': departments})
+    return render(request, 'includes/dropdown_list_options.html', {'departments': departments})
+
+
+def load_programmes(request):
+    department_id = request.GET.get('department')
+    programmes = Programme.objects.filter(department_id=department_id).order_by('name')
+    return render(request, 'includes/dropdown_list_options.html', {'programmes': programmes})
 
 
 def upload_photo(request):

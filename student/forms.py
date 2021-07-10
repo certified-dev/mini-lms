@@ -65,6 +65,7 @@ class StudentSignUpForm(UserCreationForm):
 
         # Filter Department choice by selected faculty
         self.fields['department'].queryset = Department.objects.none()
+        self.fields['programme'].queryset = Programme.objects.none()
 
         for field_name in ['password1', 'password2']:
             self.fields[field_name].help_text = None
@@ -78,6 +79,15 @@ class StudentSignUpForm(UserCreationForm):
                 pass  # invalid input from the client; ignore and fallback to empty department queryset
         elif self.instance.pk:
             self.fields['department'].queryset = self.instance.faculty.department_set.order_by('name')
+
+        if 'department' in self.data:
+            try:
+                department_id = int(self.data.get('department'))
+                self.fields['programme'].queryset = Programme.objects.filter(department_id=department_id).order_by('name')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty department queryset
+        elif self.instance.pk:
+            self.fields['programme'].queryset = self.instance.department.programme_set.order_by('name')
 
     # Check if inputted email has not been used by another user
     def clean_email(self):
@@ -126,14 +136,15 @@ class CourseRegistrationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         active_session = Session.objects.get(active=True)
 
-        if '/1' in active_session.title:
-            session = "1st"
-        elif '/2' in active_session.title:
-            session = "2nd"
+        if '1' in active_session.semester.title:
+            session = "1"
+        elif '2' in active_session.semester.title:
+            session = "2"
 
-        courses = Course.objects.filter(semester__title=session, host_faculty=self.request.user.faculty)
-        others = Course.objects.filter(host_faculty__name="General Studies", semester__title=session)
+        courses = Course.objects.filter(semester__title__icontains=session, host_faculty=self.request.user.faculty)
+        others = Course.objects.filter(host_faculty__name="General Studies", semester__title__icontains=session)
         self.fields["courses"].queryset = courses | others
+        # self.fields["courses"].queryset = Course.objects.all()
 
     # Check if selected courses is empty or has more than 24 credit unit
     def clean_courses(self):

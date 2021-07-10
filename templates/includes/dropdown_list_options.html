@@ -1,0 +1,11 @@
+<option value="">---------</option>
+{% if departments %}
+    {% for department in departments %}
+    <option value="{{ department.pk }}">{{ department.name }}</option>
+    {% endfor %}
+{% elif programmes %}
+    {% for programme in programmes %}
+    <option value="{{ programme.pk }}">{{ programme.name }}</option>
+    {% endfor %}
+{% endif %}
+
