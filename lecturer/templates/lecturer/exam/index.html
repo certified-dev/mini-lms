@@ -50,14 +50,15 @@
     {% for exam in exams %}
     <div class="card">
       <div class="card-body">
-      <p><strong>Course :</strong> {{ exam.course }}</p>
-      <p><strong>Title :</strong> {{ exam.course.title }}</p>
-      <p><strong>Total Questions :</strong> {{ exam.questions_count }}</p>
-      <p><strong>Duration :</strong> 1hr 30mins</p>
-      <p><strong>Registered :</strong> {{ student_count }}</p>
-      <p><strong>Attempted :</strong> {{ exam.taken_count }}</p>
-      <a class="btn btn-primary" href="#" role="button"> Add questions</a>
-      <a class="btn btn-info" href="#" role="button"> View Results</a>
+          <p><strong>Course :</strong> {{ exam.course }}</p>
+          <p><strong>Title :</strong> {{ exam.course.title }}</p>
+          <p><strong>Credit Unit :</strong> {{ exam.course.credit_unit }}</p>
+          <p><strong>Total Questions :</strong> {{ exam.questions_count }}</p>
+          <p><strong>Duration :</strong>{% if exam.course.credit_unit > 2 %} 1hrs 30mins {% else %} 1hrs {% endif %}</p>
+          <p><strong>Registered :</strong> {{ student_count }}</p>
+          <p><strong>Attempted :</strong> {{ exam.taken_count }}</p>
+          <a class="btn btn-primary" href="{% url 'lecturer:exam_questions' exam.pk %}" role="button"> Add questions</a>
+          <a class="btn btn-info" href="#" role="button"> View Results</a>
       </div>
       </div>
        {% empty %}

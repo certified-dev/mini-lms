@@ -70,7 +70,7 @@ $(document).ready(function () {
           text: 'You Have Registered For This Semester',
           icon: 'success',
           confirmButtonText: 'Ok',
-          footer: '<a href="/student/courses/">View Courses</a>'
+          footer: '<a href="/student/courses">View Courses</a>'
 
         })
 
@@ -110,7 +110,7 @@ $(document).ready(function () {
             text: 'T.M.A Completed!!!',
             icon: 'success',
             confirmButtonText: 'Ok',
-            footer: '<a href="/student/courses/">View Courses</a>'
+            footer: '<a href="/student/courses">View Courses</a>'
           })
 
         } else {
@@ -133,7 +133,7 @@ $(document).ready(function () {
         text: 'If You Have Registered For The Semester, Go Ahead And Register Your Courses.else Register both Semester And Your Courses',
         icon: 'warning',
         confirmButtonText: 'Ok',
-        footer: '<a href="/student/semester/register/">Semester</a><a href="/student/courses/" class="ml-5">Courses</a>'
+        footer: '<a href="/student/semester/registration">Semester</a><a href="/student/courses" class="ml-5">Courses</a>'
       })
 
 
@@ -491,7 +491,7 @@ $(document).ready(function () {
             text: courses,
             icon: 'info',
             confirmButtonText: 'Ok',
-            footer: '<a href="/student/courses/">View Courses</a>'
+            footer: '<a href="/student/courses">View Courses</a>'
           })
 
 
@@ -501,10 +501,10 @@ $(document).ready(function () {
 
             Swal.fire({
               title: 'Insufficient Funds!!!',
-              text: 'Your Wallet balance is not enough for this transaction,refund Your Wallet And Try Again',
+              text: 'Your wallet balance is not enough for this transaction,Refund your wallet wnd try again',
               icon: 'warning',
               confirmButtonText: 'Ok',
-              footer: '<a href="/student/wallet/">Refund Wallet</a>'
+              footer: '<a href="/student/wallet">Refund Wallet</a>'
             })
 
 
@@ -524,7 +524,7 @@ $(document).ready(function () {
           text: 'Please register for semester to continue courses registration',
           icon: 'warning',
           confirmButtonText: 'Ok',
-          footer: '<a href="/student/semester/register/">Register Semester</a>'
+          footer: '<a href="/student/semester/registration">Register Semester</a>'
         })
 
       }
@@ -534,7 +534,7 @@ $(document).ready(function () {
 
       Swal.fire({
         title: 'Registration Closed',
-        text: 'Course Registration Closed For The Semester.',
+        text: 'Course registration closed for the semester.',
         icon: 'error',
         confirmButtonText: 'Ok'
       })
@@ -563,7 +563,7 @@ $(document).ready(function () {
         text: 'Please register for semester to continue courses registration',
         icon: 'warning',
         confirmButtonText: 'Ok',
-        footer: '<a href="/student/semester/register/">Register Semester</a>'
+        footer: '<a href="/student/semester/registration">Register Semester</a>'
       })
 
     }
@@ -586,10 +586,10 @@ $(document).ready(function () {
 
         Swal.fire({
           title: 'Courses Unregistered!',
-          text: 'Sorry, Seems Like You Have No Registered Courses',
+          text: 'Sorry, seems like you have no registered courses',
           icon: 'error',
           confirmButtonText: 'Ok',
-          footer: '<a href="/student/courses/register/">Register Courses</a>'
+          footer: '<a href="/student/courses/registration">Register Courses</a>'
         })
 
       }
@@ -601,7 +601,7 @@ $(document).ready(function () {
         text: 'Please register for semester to continue courses registration',
         icon: 'warning',
         confirmButtonText: 'Ok',
-        footer: '<a href="/student/semester/register/">Register Semester</a>'
+        footer: '<a href="/student/semester/registration">Register Semester</a>'
       })
 
     }

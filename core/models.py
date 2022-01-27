@@ -1,38 +1,15 @@
 import math
+from datetime import datetime
 
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.html import mark_safe
 from django.utils.text import Truncator
 
 from lecturer.models import Lecturer
-
 from markdown2 import markdown
 
-STATES = (
-    ('------', '------'),
-    ('Abia', 'Abia'),
-    ('Adamawa', 'Adamawa'),
-    ('Akwa Ibom', 'Akwa ibom'),
-    ('Anambra', 'Anambra'),
-    ('Bauchi', 'Bauchi'),
-    ('Benue', 'Benue'),
-    ('Borno', 'Borno'),
-    ('Cross River', 'Cross River'),
-    ('Delta', 'Delta'),
-    ('Ebonyi', 'Ebonyi'),
-    ('Edo', 'Edo'),
-    ('Enugu', 'Enugu'),
-    ('Imo', 'Imo'),
-    ('Plateau', 'Plateau'),
-    ('Rivers', 'Rivers'),
-    ('Lagos', 'Lagos'),
-    ('Taraba', 'Taraba'),
-    ('Abuja', 'Abuja'),
-    ('Yola', 'Yola'),
-
-)
+from student.choices import STATES, LEVEL
 
 
 def user_directory_path(instance, filename):
@@ -54,11 +31,16 @@ class Session(models.Model):
     semester = models.OneToOneField(Semester, on_delete=models.CASCADE)
     start_date = models.DateField()
     close_date = models.DateField()
+    exam_start = models.DateField()
+    tma_start = models.DateField()
+    exam_end = models.DateField()
+    tma_end = models.DateField()
     registration_end = models.DateField()
     active = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.semester.title
+        year = (self.start_date).year
+        return '%s_%s' % (year, self.semester)
 
 
 class Faculty(models.Model):
@@ -87,7 +69,7 @@ class User(AbstractUser):
     photo = models.ImageField(
         upload_to=user_directory_path, default='placeholder/image.jpeg')
     phone = models.CharField(max_length=15, null=True, blank=True)
-    birth_date = models.DateField()
+    birth_date = models.DateField(null=True)
     address = models.CharField(max_length=100, blank=True)
     birth_place = models.CharField(
         max_length=50, choices=STATES, default='Unknown')
@@ -126,6 +108,7 @@ class Course(models.Model):
         ('Elective', 'Elective'),
     )
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    level = models.CharField(choices=LEVEL, max_length=10)
     title = models.CharField(max_length=100)
     designation = models.CharField(
         choices=DESIGNATION, max_length=15, null=True)
@@ -136,9 +119,6 @@ class Course(models.Model):
         Lecturer, on_delete=models.DO_NOTHING, blank=True, null=True)
     host_faculty = models.ForeignKey(
         Faculty, on_delete=models.CASCADE, null=True, blank=True)
-    tma1_done = models.BooleanField(default=False)
-    tma2_done = models.BooleanField(default=False)
-    tma3_done = models.BooleanField(default=False)
 
     def __str__(self):
         return self.code
@@ -159,46 +139,6 @@ class Expense(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Tma(models.Model):
-    TMA = (
-        ('TMA 1', 'TMA 1'),
-        ('TMA 2', 'TMA 2'),
-        ('TMA 3', 'TMA 3'),
-    )
-
-    admin = models.ForeignKey(
-        Lecturer, on_delete=models.CASCADE, related_name='tmas')
-    title = models.CharField(max_length=50, choices=TMA)
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name='tmas')
-    done = models.BooleanField(default=False)
-    available = models.BooleanField(default=True)
-    session = models.ForeignKey(
-        Session, on_delete=models.CASCADE, related_name='tma_session')
-
-    def __str__(self):
-        return '%s %s %s' % (self.course, self.title, self.session)
-
-
-class Question(models.Model):
-    tma = models.ForeignKey(
-        Tma, on_delete=models.CASCADE, related_name='questions')
-    text = models.CharField('Question', max_length=4000)
-
-    def __str__(self):
-        return self.text
-
-
-class Answer(models.Model):
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, related_name='answers')
-    text = models.CharField('Answer', max_length=500)
-    is_correct = models.BooleanField('Correct answer', default=False)
-
-    def __str__(self):
-        return self.text
 
 
 class Topic(models.Model):

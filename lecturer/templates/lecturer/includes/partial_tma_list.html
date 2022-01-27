@@ -3,7 +3,7 @@
     <td class="align-middle">{{ forloop.counter }}</td>
     <td class="align-middle"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.title|upper }}</a></td>
     <td class="align-middle">{{ tma.course }}</td>
-    <td class="align-middle">{{ tma.questions_count }}</td>
+    <td class="align-middle">{{ tma.tma_questions_count }}</td>
     <td class="align-middle">{{ tma.taken_count }}</td>
     <td class="text-right">
 

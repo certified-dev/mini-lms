@@ -3,10 +3,12 @@ import floppyforms.__future__ as forms
 from django.forms.utils import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
-from core.models import Question, Faculty, STATES, Course, Tma, Topic
+
+from core.models import Faculty, Course, Topic
 from lecturer.models import Lecturer
-from student.forms import GENDER
-from exams.models import Exam
+from student.models import Tma, Exam, TmaQuestion, ExamQuestion
+
+from student.choices import GENDER, TYPES, STATES, TMA
 
 User = get_user_model()
 
@@ -73,11 +75,6 @@ class PassportForm(forms.ModelForm):
 
 
 class TmaForm(forms.ModelForm):
-    TMA = (
-        ('TMA 1', 'TMA 1'),
-        ('TMA 2', 'TMA 2'),
-        ('TMA 3', 'TMA 3'),)
-
     title = forms.ChoiceField(choices=TMA, required=True)
 
     class Meta:
@@ -100,7 +97,32 @@ class QuestionForm(forms.ModelForm):
                            help_text='The max length of the question is 4000.')
 
     class Meta:
-        model = Question
+        model = TmaQuestion
+        fields = ('text',)
+
+
+class ExamQuestionForm(forms.ModelForm):
+    type = forms.ChoiceField(required=True, choices=TYPES, widget=forms.RadioSelect)
+    text = forms.CharField(required=True,
+                           widget=forms.Textarea(
+                               attrs={'rows': 2, 'placeholder': 'Enter your Question.'}),
+                           max_length=4000,
+                           help_text='The max length of the question is 4000.')
+
+    class Meta:
+        model = ExamQuestion
+        fields = ('text', 'type')
+
+
+class ExamQuestionUpdateForm(forms.ModelForm):
+    text = forms.CharField(required=True,
+                           widget=forms.Textarea(
+                               attrs={'rows': 2, 'placeholder': 'Enter your Question.'}),
+                           max_length=4000,
+                           help_text='The max length of the question is 4000.')
+
+    class Meta:
+        model = ExamQuestion
         fields = ('text',)
 
 
@@ -151,7 +173,6 @@ class NewTopicForm(forms.ModelForm):
 
 
 class UpdateTopicForm(forms.ModelForm):
-
     class Meta:
         model = Topic
         fields = ('subject', 'message', 'files')

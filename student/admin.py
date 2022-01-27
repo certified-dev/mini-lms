@@ -1,9 +1,18 @@
 from django.contrib import admin
 
-from student.models import Student, TakenTma, StudentAnswer, CreditTransaction, DebitTransaction
+from core.models import Expense
+from student.models import TakenExam, TakenTma, Tma, TmaQuestion, ExamQuestion, TmaAnswer, ExamAnswer, \
+    CreditTransaction, DebitTransaction, Exam, Student
 
 admin.site.register(TakenTma)
-admin.site.register(StudentAnswer)
+admin.site.register(TakenExam)
+admin.site.register(Tma)
+admin.site.register(Exam)
+admin.site.register(TmaQuestion)
+admin.site.register(ExamQuestion)
+admin.site.register(Expense)
+admin.site.register(TmaAnswer)
+admin.site.register(ExamAnswer)
 admin.site.register(CreditTransaction)
 admin.site.register(DebitTransaction)
 
@@ -13,8 +22,8 @@ class StudentAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {'fields': ('user',)}),
-        ('Details', {'fields': ('department', 'level', 'programme', 'study_centre', 'courses', 'wallet_balance')}),
-        ('Actions', {'fields': ('semester_registered', 'paid_compulsory_fee', 'tma_completed')})
+        ('Details', {'fields': ('department', 'level', 'programme', 'study_centre', 'courses','exams', 'wallet_balance')}),
+        ('Actions', {'fields': ('semester_registered', 'paid_compulsory_fee', 'tma_completed',  'semesters_completed')})
     )
 
 

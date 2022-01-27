@@ -39,8 +39,8 @@
          </tr>
       </thead>
       <tbody>
-        {% for opt in question.answers.all %}
-        {% marked_answer user opt as opt_marked %}
+        {% for opt in question.tma_answers.all %}
+        {% marked_tma_answer user opt as opt_marked %}
         <tr>
           <td style="width: 100px;{% if opt_marked == 'correct' %} background: forestgreen{% elif opt_marked == 'wrong' %} background:red{% endif %}"> </td>
           <td style="width: 100px;{% if opt.is_correct %} background:forestgreen{% endif %}"></td>

@@ -8,28 +8,13 @@ from django.template.loader import render_to_string
 
 from django.contrib.auth.forms import UserCreationForm
 
-from core.models import Course, Answer, Faculty, Department, Studycentre, Programme, Post, Session
+from core.models import Course, Faculty, Department, Studycentre, Programme, Post, Session
 
-from student.models import Student, StudentAnswer
-from exams.models import Exam
+from student.models import Student, StudentTmaAnswer, ExamAnswer, Exam, TmaAnswer, StudentExamAnswer
+
+from student.choices import STATES, GENDER, LEVEL
 
 User = get_user_model()
-
-GENDER = (
-    ('-------', '-------'),
-    ('Male', 'Male'),
-    ('Female', 'Female'),
-
-)
-
-STATES = (
-    ('-------', '-------'),
-    ('Lagos', 'Lagos'),
-    ('Edo', 'Edo'),
-    ('Abuja', 'Abuja'),
-    ('Yola', 'Yola'),
-
-)
 
 
 class StudentSignUpForm(UserCreationForm):
@@ -47,14 +32,15 @@ class StudentSignUpForm(UserCreationForm):
     faculty = forms.ModelChoiceField(queryset=Faculty.objects.all())
 
     # Add Extra Student options fields to form
-    study_centre = forms.ModelChoiceField(queryset=Studycentre.objects.all())
+    study_centre = forms.ModelChoiceField(queryset=Studycentre.objects.all(), required=False)
     programme = forms.ModelChoiceField(queryset=Programme.objects.all())
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False)
+    department = forms.ModelChoiceField(queryset=Department.objects.all())
+    level = forms.ChoiceField(choices=LEVEL, required=True)
 
     class Meta:
         model = User
         fields = ('first_name', 'other_name', 'last_name', 'sex', 'birth_place',
-                  'address', 'phone', 'email', 'faculty', 'department',
+                  'address', 'phone', 'email', 'faculty', 'department', 'level',
                   'programme', 'study_centre', 'birth_date',)
 
     # Add placeholders to UserCreationForm password fields
@@ -83,7 +69,8 @@ class StudentSignUpForm(UserCreationForm):
         if 'department' in self.data:
             try:
                 department_id = int(self.data.get('department'))
-                self.fields['programme'].queryset = Programme.objects.filter(department_id=department_id).order_by('name')
+                self.fields['programme'].queryset = Programme.objects.filter(department_id=department_id).order_by(
+                    'name')
             except (ValueError, TypeError):
                 pass  # invalid input from the client; ignore and fallback to empty department queryset
         elif self.instance.pk:
@@ -101,18 +88,24 @@ class StudentSignUpForm(UserCreationForm):
     @transaction.atomic
     def save(self):
         user = super().save(commit=False)
-        # Generate student matric number
-        n = random.randint(10000, 50000)
-        user.username = 'stu' + str(n)
+
+        while True:
+            gen_matric = 'stu' + str(random.randint(10000, 50000))
+            if not Student.objects.filter(user__username=gen_matric).exists():
+                user.username = gen_matric
+                break
+                
+
         user.is_student = True
         user.save()
         # retrieve student info from relevant form field
         study_centre = self.cleaned_data.get('study_centre')
         programme = self.cleaned_data.get('programme')
         department = self.cleaned_data.get('department')
+        level = self.cleaned_data.get('level')
         # Create student object with user id
         Student.objects.create(user=user, study_centre=study_centre, programme=programme,
-                               department=department, level=100)
+                               department=department, level=level)
         return user
 
 
@@ -130,23 +123,29 @@ class CourseRegistrationForm(forms.ModelForm):
             'courses': forms.CheckboxSelectMultiple
         }
 
-    # Filter semester registrable  courses by student level and faculty
     def __init__(self, *args, **kwargs):
+        global session
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
-        active_session = Session.objects.get(active=True)
+        user = self.request.user
 
-        if '1' in active_session.semester.title:
-            session = "1"
-        elif '2' in active_session.semester.title:
+        if int(user.student.semesters_completed) % 2:
             session = "2"
+        else:
+            session = "1"
 
-        courses = Course.objects.filter(semester__title__icontains=session, host_faculty=self.request.user.faculty)
-        others = Course.objects.filter(host_faculty__name="General Studies", semester__title__icontains=session)
-        self.fields["courses"].queryset = courses | others
-        # self.fields["courses"].queryset = Course.objects.all()
+        reg_courses = user.student.courses.all().values_list('pk', flat=True)
 
-    # Check if selected courses is empty or has more than 24 credit unit
+        main_courses = Course.objects.filter(semester__title=session,
+                                        level=user.student.level,
+                                        host_faculty=user.faculty)
+        gen_courses = Course.objects.filter(host_faculty__name="General Studies",
+                                       level=user.student.level,
+                                       semester__title=session)
+        form_courses = main_courses | gen_courses
+        
+        self.fields["courses"].queryset = form_courses.exclude(pk__in=reg_courses)
+
     def clean_courses(self):
         courses = self.cleaned_data['courses']
         msg = render_to_string('student/error/insufficient.html')
@@ -189,25 +188,53 @@ class ExamRegistrationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
-        self.fields["exams"].queryset = Exam.objects.filter(course__in=self.request.user.student.courses.all())
+        student_courses = self.request.user.student.courses.all()
+        regged_exams = self.request.user.student.exams.all().values_list('pk', flat=True)
+        self.fields["exams"].queryset = Exam.objects.filter(course__in=student_courses).exclude(pk__in=regged_exams)
 
 
 class TakeTmaForm(forms.ModelForm):
     answer = forms.ModelChoiceField(
-        queryset=Answer.objects.none(),
+        queryset=TmaAnswer.objects.none(),
         widget=django_forms.RadioSelect(),
         required=True,
         empty_label=None)
 
     class Meta:
-        model = StudentAnswer
+        model = StudentTmaAnswer
         fields = ('answer',)
 
     # Filter answers by question
     def __init__(self, *args, **kwargs):
         question = kwargs.pop('question')
         super().__init__(*args, **kwargs)
-        self.fields['answer'].queryset = question.answers.order_by('text')
+        self.fields['answer'].queryset = question.tma_answers.order_by('text')
+
+
+class TakeExamForm(forms.ModelForm):
+    answer = forms.ModelChoiceField(
+        queryset=ExamAnswer.objects.none(),
+        required=True,
+        empty_label=None)
+
+    class Meta:
+        model = StudentExamAnswer
+        fields = ('answer',)
+
+    # Filter answers by question
+    def __init__(self, *args, **kwargs):
+        question = kwargs.pop('question')
+        super().__init__(*args, **kwargs)
+        if question.type == 'objective':
+            self.fields['answer'].queryset = question.exam_answers.order_by('text')
+            self.fields['answer'].widget = django_forms.RadioSelect()
+        else:
+            self.fields['answer'].widget = django_forms.TextInput()
+
+
+TakeExamFormSet = forms.modelformset_factory(
+    StudentExamAnswer, form=TakeExamForm, extra=5
+)
 
 
 class PostForm(forms.ModelForm):

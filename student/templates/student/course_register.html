@@ -17,15 +17,32 @@
                     </button>
             </div>
             <div class="modal-body">
-                <p class="text-center"><small><strong> You can register up to a maximum of 24 credit unit courses</strong></small></p>
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        <div class="card p-2">
-                            {{ form.as_table }}
-                        </div>
-                        <button type="submit" class="btn btn-primary mt-2 float-right">Register</button>
-                        <button type="button" class="btn btn-outline-danger mt-2 float-right mr-2" data-dismiss="modal" >Cancel</button>   
-                  </form>
+                
+                <div class="alert alert-info text-center" role="alert">
+                    <small>
+                        <strong> You can register up to a maximum of 24 credit unit courses</strong>
+                    </small>
+                </div>
+
+                <p>
+                    {% for course in regged_courses %}
+                    <div class="badge badge-success">{{ course }}</div>
+                    {% endfor %}
+                </p>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="card p-2">
+                        {{ form.as_table }}
+                    </div>
+                    {% if form_stat %}
+                    <button type="submit" class="btn btn-primary mt-2 float-right">Register</button>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary mt-2 float-right" disabled>Register</button>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-danger mt-2 float-right mr-2" data-dismiss="modal" >Cancel</button>   
+                </form>
+                  
             </div>
         </div>
     </div>
@@ -41,6 +58,8 @@
 
 <button id="reg" class="btn btn-primary mb-3"><i class="fas fa-plus" style="color:white;"></i> Select</button>
 <div class="badge badge-info float-right"> <h5 class="mb-0">{{ session }}</h5></div>
+
+<div class="alert alert-info text-center" role="alert"><b>Available Courses</b></div>
 
     <div class="row mb-4">
         <div class="col-md-12 col-lg-12">

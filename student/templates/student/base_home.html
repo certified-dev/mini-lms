@@ -80,18 +80,18 @@
                         <div class="collapse" id="RegistrationCollapseSlips" aria-labelledby="headingOne" data-parent="#sidenavAccordionPages">
                           <nav class="sb-sidenav-menu-nested nav">
                             {% if user.student.semester_registered %}
-                            <a href="{% url 'student:semester_slip' %}" class="nav-link">Semester</a>
+                            <a href="#" class="nav-link">Semester</a>
                               {% endif %}
                               {% if user.student.courses.count > 0 %}
-                            <a href="{% url 'student:courses_slip' %}" class="nav-link">Courses</a>
+                            <a href="#" class="nav-link">Courses</a>
                             {% endif %}
                            {% if user.student.exams.count > 0 %}
-                             <a href="{% url 'student:exams_slip' %}" class="nav-link">Exam</a>
+                             <a href="#" class="nav-link">Exam</a>
                               {% endif %}
                             {% if user.student.project_registered %}
                             <a href="#" class="nav-link">Project</a>
                               {% endif %}
-                            <a href="{% url 'student:id_card' %}" class="nav-link">Identity Card</a>
+                            <a href="#" class="nav-link">Identity Card</a>
                             
                           </nav>
                         </div>
@@ -107,6 +107,9 @@
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link" href="{% url 'student:tma_list' %}">T.M.A</a>
                     </nav>
+                    <nav class="sb-sidenav-menu-nested nav">
+                      <a class="nav-link" href="{% url 'student:exam_list' %}">Examination</a>
+                  </nav>
                 </div>
                 <a class="nav-link" href="{% url 'student:student_courses' %}">
                   <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>

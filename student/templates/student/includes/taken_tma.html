@@ -5,12 +5,12 @@
         </h3>
     </div>
     <div class="card-body text-center">
-        <p class="card-text"><i class="fas fa-file-contract"></i> Course: {{ taken_tma.tma.course|upper}}</p>
-        <p class="card-text"><i class="fas fa-question"></i> Total Questions: {{ total_questions }}</p>
-        <p class="card-text"><i class="fas fa-list"></i> Total Score: {{ taken_tma.score }}</p>
-        <p class="card-text"><i class="fas fa-check-circle"></i> Correct Answers: {{ taken_tma.correct_answers }}</p>
-        <p class="card-text"><i class="fas fa-times-circle"></i> Incorrect Answers: {{ taken_tma.incorrect_answers }}</p>
-        <p class="card-text"><i class="fas fa-calendar"></i> Date Taken: {{ taken_tma.date|date:" D d M Y " }}</p>
-        <p class="card-text"><i class="fas fa-clock"></i> Time Taken: {{ taken_tma.date|time:" h:i a " }}</p>
+        <p class="card-text"><i class="fas fa-file-contract text-secondary"></i> Course: <b>{{ taken_tma.tma.course|upper}}</b></p>
+        <p class="card-text"><i class="fas fa-question text-secondary"></i> Total Questions: <b>{{ total_questions }}</b></p>
+        <p class="card-text"><i class="fas fa-list text-secondary"></i> Total Score: <b>{{ taken_tma.score }}</b></p>
+        <p class="card-text"><i class="fas fa-check-circle text-secondary"></i> Correct Answers: <b>{{ taken_tma.correct_answers }}</b></p>
+        <p class="card-text"><i class="fas fa-times-circle text-secondary"></i> Incorrect Answers: <b>{{ taken_tma.incorrect_answers }}</b></p>
+        <p class="card-text"><i class="fas fa-calendar text-secondary"></i> Date Taken: <b>{{ taken_tma.date|date:" D d M Y " }}</b></p>
+        <p class="card-text"><i class="fas fa-clock text-secondary"></i> Time Taken: <b>{{ taken_tma.date|time:" h:i a " }}</b></p>
     </div> 
 </div>

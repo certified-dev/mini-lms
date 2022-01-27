@@ -12,13 +12,12 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
-from core.models import User, Tma, Question, Answer, Topic, Post, Course, Session
+from core.models import User, Topic, Post, Course, Session
 from mini_lms.decorators import lecturer_required, anonymous_required
-from exams.models import Exam
 from lecturer.forms import LecturerSignUpForm, QuestionForm, BaseAnswerInlineFormSet, TmaForm, \
-    NewTopicForm, UpdateTopicForm, ExamForm
+    NewTopicForm, UpdateTopicForm, ExamForm, ExamQuestionForm, ExamQuestionUpdateForm
 from student.forms import PhotoUploadForm
-from student.models import Student
+from student.models import Student, Tma, Exam, TmaQuestion, TmaAnswer, ExamQuestion, ExamAnswer
 
 
 class PassRequestToFormMixin:
@@ -137,11 +136,15 @@ def tma_update(request, pk):
 def tma_delete(request, pk):
     tma = get_object_or_404(Tma, pk=pk)
     data = dict()
+    tmas = request.user.lecturer.tmas.select_related('course') \
+        .annotate(tma_questions_count=Count('tma_questions', distinct=True)) \
+        .annotate(taken_count=Count('taken_tmas', distinct=True))
+
     if request.method == 'POST':
         tma.delete()
         data['form_is_valid'] = True
         data['html_tma_list'] = render_to_string('lecturer/includes/partial_tma_list.html', {
-            'tmas': Tma.objects.filter(admin=request.user.lecturer)
+            'tmas': tmas
         })
     else:
         data['html_form'] = render_to_string('lecturer/includes/partial_tma_delete.html', {'tma': tma}, request=request)
@@ -166,7 +169,7 @@ class TmaListView(ListView):
     def get_queryset(self):
         queryset = self.request.user.lecturer.tmas \
             .select_related('course') \
-            .annotate(questions_count=Count('questions', distinct=True)) \
+            .annotate(tma_questions_count=Count('tma_questions', distinct=True)) \
             .annotate(taken_count=Count('taken_tmas', distinct=True))
         return queryset
 
@@ -177,17 +180,14 @@ class TmaQuestionView(PassRequestToFormMixin, UpdateView):
     form_class = TmaForm
     context_object_name = 'tma'
     template_name = 'lecturer/tma_question.html'
-    paginate_by = 9
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
-        kwargs['questions'] = self.get_object().questions.annotate(answers_count=Count('answers'))
+        kwargs['questions'] = self.get_object().tma_questions.annotate(tma_answers_count=Count('tma_answers'))
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
         return self.request.user.lecturer.tmas.all()
-
-    def get_success_url(self):
-        return reverse('lecturer:tma_question', kwargs={'pk': self.object.pk})
 
 
 @method_decorator([login_required, lecturer_required], name='dispatch')
@@ -195,7 +195,7 @@ class TmaResultsView(DetailView):
     model = Tma
     context_object_name = 'tma'
     template_name = 'lecturer/tma_results.html'
-    paginate_by = 9
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         tma = self.get_object()
@@ -234,11 +234,11 @@ def question_add(request, pk):
 @lecturer_required
 def question_change(request, tma_pk, question_pk):
     tma = get_object_or_404(Tma, pk=tma_pk, admin=request.user.lecturer)
-    question = get_object_or_404(Question, pk=question_pk, tma=tma)
+    question = get_object_or_404(TmaQuestion, pk=question_pk, tma=tma)
 
     AnswerFormSet = inlineformset_factory(
-        Question,  # parent model
-        Answer,  # base model
+        TmaQuestion,  # parent model
+        TmaAnswer,  # base model
         formset=BaseAnswerInlineFormSet,
         fields=('text', 'is_correct'),
         min_num=4,
@@ -269,7 +269,7 @@ def question_change(request, tma_pk, question_pk):
 
 
 def question_delete(request, pk, question_pk):
-    question = get_object_or_404(Question, pk=question_pk, tma__pk=pk)
+    question = get_object_or_404(TmaQuestion, pk=question_pk, tma__pk=pk)
 
     data = dict()
     if request.method == 'POST':
@@ -288,7 +288,7 @@ def question_delete(request, pk, question_pk):
 class ExamAddView(PassRequestToFormMixin, CreateView):
     model = Exam
     form_class = ExamForm
-    template_name = 'lecturer/exam_index.html'
+    template_name = 'lecturer/exam/index.html'
 
     def get_context_data(self, **kwargs):
         lecturer_courses = Course.objects.filter(lecturer=self.request.user.lecturer).count()
@@ -304,7 +304,7 @@ class ExamAddView(PassRequestToFormMixin, CreateView):
             'courses': Course.objects.filter(lecturer=self.request.user.lecturer).count(),
             'exams': self.request.user.lecturer.exams \
                 .select_related('course') \
-                .annotate(questions_count=Count('questions', distinct=True)) \
+                .annotate(questions_count=Count('exam_questions', distinct=True)) \
                 .annotate(taken_count=Count('taken_exams', distinct=True)),
             'check': check,
             'student_count': student_count
@@ -315,6 +315,7 @@ class ExamAddView(PassRequestToFormMixin, CreateView):
     def form_valid(self, form):
         exam = form.save(commit=False)
         exam.admin = self.request.user.lecturer
+        exam.session = Session.objects.get(active=True)
         exam.save()
         messages.success(self.request, 'Exam added successfully.')
         return redirect('lecturer:exam_index')
@@ -322,6 +323,97 @@ class ExamAddView(PassRequestToFormMixin, CreateView):
     def form_invalid(self, form):
         messages.error(self.request, 'Check your Input And Try Again.')
         return super().form_invalid(form)
+
+
+@method_decorator([login_required, lecturer_required], name='dispatch')
+class ExamQuestionView(PassRequestToFormMixin, UpdateView):
+    model = Exam
+    form_class = TmaForm
+    context_object_name = 'exam'
+    template_name = 'lecturer/exam/question.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        kwargs['questions'] = self.get_object().exam_questions.annotate(exam_answers_count=Count('exam_answers'))
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        return self.request.user.lecturer.exams.all()
+
+
+@login_required
+@lecturer_required
+def exam_question_add(request, pk):
+    exam = get_object_or_404(Exam, pk=pk, admin=request.user.lecturer)
+
+    if request.method == 'POST':
+        form = ExamQuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.exam = exam
+            question.save()
+            messages.success(request, 'You may now add answers/options to the question.')
+            return redirect('lecturer:exam_question_change', exam.pk, question.pk)
+    else:
+        form = ExamQuestionForm()
+
+    return render(request, 'lecturer/exam/question_add_form.html', {'exam': exam, 'form': form})
+
+
+@login_required
+@lecturer_required
+def exam_question_change(request, exam_pk, question_pk):
+    exam = get_object_or_404(Exam, pk=exam_pk, admin=request.user.lecturer)
+    question = get_object_or_404(ExamQuestion, pk=question_pk, exam=exam)
+
+    SubjectiveAnswerFormSet = inlineformset_factory(
+        ExamQuestion,  # parent model
+        ExamAnswer,  # base model
+        formset=BaseAnswerInlineFormSet,
+        fields=('text', 'is_correct'),
+        min_num=1,
+        validate_min=True,
+        max_num=1,
+        validate_max=True,
+    )
+
+    ObjectiveAnswerFormSet = inlineformset_factory(
+        ExamQuestion,  # parent model
+        ExamAnswer,  # base model
+        formset=BaseAnswerInlineFormSet,
+        fields=('text', 'is_correct'),
+        min_num=3,
+        validate_min=True,
+        max_num=4,
+        validate_max=True,
+    )
+
+    if request.method == 'POST':
+        if question.type == "MCQ":
+            formset = ObjectiveAnswerFormSet(request.POST, instance=question)
+        else:
+            formset = SubjectiveAnswerFormSet(request.POST, instance=question)
+
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                form.save()
+                formset.save()
+            messages.success(request, 'Question and answers saved with success!')
+            return redirect('lecturer:exam_questions', exam.pk)
+    else:
+        form = QuestionForm(instance=question)
+        if question.type == "MCQ":
+            formset = ObjectiveAnswerFormSet(instance=question)
+        else:
+            formset = SubjectiveAnswerFormSet(instance=question)
+
+    return render(request, 'lecturer/exam/question_change_form.html', {
+        'exam': exam,
+        'question': question,
+        'form': form,
+        'formset': formset
+    })
 
 
 @method_decorator([login_required, lecturer_required], name='dispatch')

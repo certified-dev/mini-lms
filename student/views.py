@@ -2,12 +2,13 @@ from __future__ import unicode_literals
 
 from datetime import date
 
+from core.models import User, Expense, Course, Topic, Post, Session
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count, Sum
-from django.http import HttpResponse
+# from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -17,17 +18,12 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import CreateView, UpdateView
 from django.views.generic import ListView
-from weasyprint import HTML
-
-from core.models import User, Tma, Expense, Course, Topic, Post, Session
 from mini_lms.decorators import student_required, anonymous_required
 from student.forms import StudentSignUpForm, CourseRegistrationForm, TakeTmaForm, PostForm, \
-    ExamRegistrationForm
-from student.models import Student, TakenTma
+    ExamRegistrationForm, TakeExamFormSet
+from student.models import CreditTransaction, DebitTransaction, TmaQuestion, Exam, Student, TakenTma, Tma, TakenExam
 
-from core.models import Question
-
-from student.models import CreditTransaction, DebitTransaction
+# from weasyprint import HTML
 
 RRR_TopUp = 128709876406
 
@@ -87,19 +83,19 @@ def wallet(request):
             student.used_topup = True
             student.save()
 
-            CreditTransaction.objects.create(payer=student, type='RRR', transaction_id=rrr, amount=20000)
+            CreditTransaction.objects.create(payer=student, c_type='RRR', transaction_id=rrr, amount=20000)
             messages.success(request, 'Wallet successfully credited with ₦20,000!!!')
 
     return render(request, 'student/wallet.html', {'debit_payments': debit_payments,
                                                    'deposit_payments': deposit_payments})
 
 
-def identity_card(request):
-    response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename={username}-id-card.pdf'.format(username=request.user.username)
-    html = render_to_string('student/pdf/id_card.html', {'user': request.user})
-    HTML(string=html).write_pdf(response)
-    return response
+# def identity_card(request):
+#     response = HttpResponse(content_type='application/pdf;')
+#     response['Content-Disposition'] = 'inline; filename={username}-id-card.pdf'.format(username=request.user.username)
+#     html = render_to_string('student/pdf/id_card.html', {'user': request.user})
+#     HTML(string=html).write_pdf(response)
+#     return response
 
 
 @method_decorator([login_required, student_required, ], name='dispatch')
@@ -120,7 +116,7 @@ class SemesterRegisterView(ListView):
                 'cost': cost,
                 'semester': True,
                 'reg_open': reg_open,
-                'session': active_session.semester.title
+                'session': str(date.today().year) + '/' + active_session.semester.title
             }
             kwargs.update(extra_context)
         else:
@@ -129,7 +125,7 @@ class SemesterRegisterView(ListView):
             extra_context = {
                 'cost': cost,
                 'reg_open': reg_open,
-                'session': active_session.semester.title,
+                'session': str(date.today().year) + '/' + active_session.semester.title,
                 'semester': True
             }
             kwargs.update(extra_context)
@@ -174,12 +170,12 @@ def semester_payment(request):
         return redirect('student:student_courses')
 
 
-def semester_slip(request):
-    response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=document.pdf'
-    html = render_to_string('student/pdf/semester_slip.html', {'user': request.user})
-    HTML(string=html).write_pdf(response)
-    return response
+# def semester_slip(request):
+#     response = HttpResponse(content_type='application/pdf;')
+#     response['Content-Disposition'] = 'inline; filename=document.pdf'
+#     html = render_to_string('student/pdf/semester_slip.html', {'user': request.user})
+#     HTML(string=html).write_pdf(response)
+#     return response
 
 
 @method_decorator([login_required, student_required], name='dispatch')
@@ -191,26 +187,34 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         active_session = Session.objects.get(active=True)
-        session, reg_open = '', ''
+        session, reg_open, user = '', '', self.request.user
         if date.today() < active_session.registration_end:
             reg_open = True
 
-        if '1' in active_session.semester.title:
-            session = "1"
-        elif '2' in active_session.semester.title:
+        if int(user.student.semesters_completed) % 2:
             session = "2"
+        else:
+            session = "1"
+        
+        reg_courses = user.student.courses.all().values_list('pk', flat=True)
+        
 
-        courses = Course.objects.filter(semester__title__icontains=session, host_faculty=self.request.user.faculty)
-        others = Course.objects.filter(host_faculty__name="General Studies", semester__title__icontains=session)
-
-        student_courses = list(self.request.user.student.courses.all().values_list('code', flat=True))
+        courses = Course.objects.filter(semester__title=session, level=user.student.level,
+                                        host_faculty=self.request.user.faculty)
+        others = Course.objects.filter(host_faculty__name="General Studies", level=user.student.level,
+                                       semester__title=session)
+        student_courses = self.request.user.student.courses.all()
         reg_check = self.request.user.student.courses.aggregate(Sum('credit_unit'))['credit_unit__sum']
+        form_stat = courses | others
+
 
         extra_context = {
-            'semester_courses': courses | others,
+            'semester_courses': form_stat,
             'reg_check': reg_check,
-            'session': active_session.semester.title,
-            'student_courses': student_courses,
+            'session': str(date.today().year) + '/' + active_session.semester.title,
+            'student_courses': list(student_courses.values_list('code', flat=True)),
+            'regged_courses': student_courses,
+            'form_stat': form_stat.exclude(pk__in=reg_courses),
             'reg_open': reg_open
         }
         kwargs.update(extra_context)
@@ -253,12 +257,12 @@ def course_payment(request):
         return redirect('student:student_courses')
 
 
-def courses_slip(request):
-    response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=document.pdf'
-    html = render_to_string('student/pdf/course_slip.html', {'user': request.user})
-    HTML(string=html).write_pdf(response)
-    return response
+# def courses_slip(request):
+#     response = HttpResponse(content_type='application/pdf;')
+#     response['Content-Disposition'] = 'inline; filename=document.pdf'
+#     html = render_to_string('student/pdf/course_slip.html', {'user': request.user})
+#     HTML(string=html).write_pdf(response)
+#     return response
 
 
 @method_decorator([login_required, student_required], name='dispatch')
@@ -273,7 +277,7 @@ class StudentCoursesView(ListView):
         active_session = Session.objects.get(active=True)
         extra_context = {
             'check': check,
-            'session': active_session.semester.title,
+            'session': str(date.today().year) + '/' + active_session.semester.title,
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -296,16 +300,15 @@ class TmaListView(ListView):
     model = Tma
     ordering = ('course',)
     context_object_name = 'tmas'
-    template_name = 'student/tma_list.html'
+    template_name = 'student/tma/tma_list.html'
 
     def get_queryset(self):
         student = self.request.user.student
         student_courses = student.courses.values_list('pk', flat=True)
-        active_session = Session.objects.get(active=True)
         taken_tmas = student.tmas.values_list('pk', flat=True)
-        queryset = Tma.objects.filter(course__in=student_courses, session=active_session) \
+        queryset = Tma.objects.filter(course__in=student_courses) \
             .exclude(pk__in=taken_tmas) \
-            .annotate(questions_count=Count('questions')) \
+            .annotate(questions_count=Count('tma_questions')) \
             .filter(questions_count__gt=0)
         return queryset
 
@@ -320,6 +323,35 @@ class TmaListView(ListView):
         return super().get_context_data(**kwargs)
 
 
+@method_decorator([login_required, student_required], name='dispatch')
+class ExamListView(ListView):
+    model = Exam
+    ordering = ('created',)
+    context_object_name = 'exams'
+    template_name = 'student/exam_list.html'
+
+    # def get_queryset(self):
+    #     student = self.request.user.student
+    #     taken_exams = TakenExam.objects.filter(student=student).exam.values_list('pk', flat=True)
+    #     queryset = student.exams.exclude(pk__in=taken_exams) \
+    #         .annotate(question_exam_count=Count('question_exam')) \
+    #         .filter(question_exam_count__gt=0)
+    #     return queryset
+
+    def get_context_data(self, **kwargs):
+        active_session = Session.objects.get(active=True)
+        extra_context = {
+            #  'taken_exams': self.request.user.student.takenexam_exam \
+            #     .select_related('exam', 'exam__course') \
+            #     .order_by('exam__created'),
+            'exam_page': True,
+            'session': str(date.today().year) + '/' + active_session.semester.title,
+        }
+     
+        kwargs.update(extra_context)
+        return super().get_context_data(**kwargs)
+
+
 @login_required
 @student_required
 def take_tma(request, pk):
@@ -327,10 +359,10 @@ def take_tma(request, pk):
     student = request.user.student
 
     if student.tmas.filter(pk=pk).exists():
-        return render(request, 'student/taken_tma.html')
+        return redirect('student:tma_result', pk)
 
-    total_questions = tma.questions.count()
-    unanswered_questions = student.get_unanswered_questions(tma)
+    total_questions = tma.tma_questions.count()
+    unanswered_questions = student.get_unanswered_tma_questions(tma)
     total_unanswered_questions = unanswered_questions.count()
     progress = 100 - round(((total_unanswered_questions - 1) / total_questions) * 100)
     question = unanswered_questions.first()
@@ -342,10 +374,10 @@ def take_tma(request, pk):
                 student_answer = form.save(commit=False)
                 student_answer.student = student
                 student_answer.save()
-                if student.get_unanswered_questions(tma).exists():
+                if student.get_unanswered_tma_questions(tma).exists():
                     return redirect('student:take_tma', pk)
                 else:
-                    all_answers = student.tma_answers.filter(answer__question__tma=tma)
+                    all_answers = student.student_tma_answers.filter(answer__question__tma=tma)
                     correct_answers = all_answers.filter(answer__is_correct=True).count()
                     incorrect_answers = all_answers.filter(answer__is_correct=False).count()
 
@@ -363,17 +395,17 @@ def take_tma(request, pk):
                     #     for course in courses:
                     #         if course == tma_course:
                     #             course.tma1_done = True
-                    #             course.save()                       
+                    #             course.save()
                     # elif '2' in tma.title:
                     #    for course in courses:
                     #         if course == tma_course:
                     #             course.tma2_done = True
-                    #             course.save()   
+                    #             course.save()
                     # else:
                     #    for course in courses:
                     #         if course == tma_course:
                     #             course.tma3_done = True
-                    #             course.save()   
+                    #             course.save()
 
                     all_taken_tma = student.taken_tmas.all()
                     recent = all_taken_tma.latest('date')
@@ -382,8 +414,6 @@ def take_tma(request, pk):
                         for taken_tma in all_taken_tma:
                             if course == taken_tma.tma.course:
                                 truth_box.append(True)
-
-                    print(truth_box)
 
                     if False not in truth_box:
                         student.tma_completed = True
@@ -397,7 +427,7 @@ def take_tma(request, pk):
     else:
         form = TakeTmaForm(question=question)
 
-    return render(request, 'student/take_tma_form.html', {
+    return render(request, 'student/tma/take_tma_form.html', {
         'take_tma': True,
         'tma': tma,
         'question': question,
@@ -410,7 +440,7 @@ def take_tma(request, pk):
 
 @method_decorator([login_required, student_required], name='dispatch')
 class TmaResultsView(View):
-    template_name = 'student/tma_result.html'
+    template_name = 'student/tma/tma_result.html'
 
     def get(self, request, **kwargs):
         tma = Tma.objects.get(id=kwargs['pk'])
@@ -420,7 +450,7 @@ class TmaResultsView(View):
             Don't show the result if the user didn't attempted the tma
             """
             return render(request, '404.html')
-        questions = Question.objects.filter(tma=tma)
+        questions = TmaQuestion.objects.filter(tma=tma)
 
         messages.success(request,
                          taken_tma[0].tma.course.code + ' - ' + taken_tma[0].tma.title + ' Completed!!!')
@@ -437,7 +467,7 @@ def ajax_taken_tma(request, pk):
     if request.method == 'GET':
         data['html_form'] = render_to_string('student/includes/taken_tma.html',
                                              {'taken_tma': taken_tma,
-                                              'total_questions': taken_tma.tma.questions.count()},
+                                              'total_questions': taken_tma.tma.tma_questions.count()},
                                              request=request)
     return JsonResponse(data)
 
@@ -450,11 +480,19 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
     success_url = reverse_lazy('student:exam_pay')
 
     def get_context_data(self, **kwargs):
+        
+        student_courses = self.request.user.student.courses.all()
+        student_exams = self.request.user.student.exams.all()
+        json_exam = student_exams.values_list('pk', flat=True)
+        exam_to_reg = Exam.objects.filter(course__in=student_courses).exclude(pk__in=json_exam)
+
         active_session = Session.objects.get(active=True)
-        student_exams = list(self.request.user.student.exams.all().values_list('course__code', flat=True))
         extra_context = {
+            'student_courses': student_courses,
             'student_exams': student_exams,
-            'session': active_session.semester.title,
+            'json_exam': list(json_exam),
+            'exam_to_reg': exam_to_reg,
+            'session': str(date.today().year) + '/' + active_session.semester.title
         }
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
@@ -496,12 +534,71 @@ def exam_payment(request):
         return redirect('student:exam_reg')
 
 
-def exams_slip(request):
-    response = HttpResponse(content_type='application/pdf;')
-    response['Content-Disposition'] = 'inline; filename=document.pdf'
-    html = render_to_string('student/pdf/exam_slip.html', {'user': request.user})
-    HTML(string=html).write_pdf(response)
-    return response
+# def exams_slip(request):
+#     response = HttpResponse(content_type='application/pdf;')
+#     response['Content-Disposition'] = 'inline; filename=document.pdf'
+#     html = render_to_string('student/pdf/exam_slip.html', {'user': request.user})
+#     HTML(string=html).write_pdf(response)
+#     return response
+
+
+@login_required
+@student_required
+def take_exam(request, pk):
+    exam = get_object_or_404(Exam, pk=pk)
+    student = request.user.student
+
+    total_questions = exam.exam_questions.count()
+    unanswered_questions = student.get_unanswered_exam_questions(exam)
+    total_unanswered_questions = unanswered_questions.count()
+    question = unanswered_questions.first()
+
+    if request.method == 'POST':
+        formset= TakeExamFormSet(question=question, data=request.POST)
+        if formset.is_valid():
+            with transaction.atomic():
+                student_answer = formset.save(commit=False)
+                student_answer.student = student
+                student_answer.save()
+
+                if student.get_unanswered_exam_questions(exam).exists():
+                    return redirect('student:take_exam', pk)
+                else:
+                    all_answers = student.student_exam_answers.filter(answer__question__exam=exam)
+                    correct_answers = all_answers.filter(answer__is_correct=True).count()
+                    incorrect_answers = all_answers.filter(answer__is_correct=False).count()
+
+                    percentage = round((correct_answers / total_questions) * 100.0, 2)
+                    TakenTma.objects.create(student=student,
+                                            exam=exam,
+                                            score=correct_answers,
+                                            correct_answers=correct_answers,
+                                            incorrect_answers=incorrect_answers,
+                                            percentage=percentage)
+
+                    all_taken_exam = student.taken_exam.all()
+                    recent = all_taken_exam.latest('date')
+
+                    messages.success(request,
+                                     'Congratulations! You completed %s examination! You scored %s/%s' % (
+                                         recent.tma.course, correct_answers, total_questions))
+                    return redirect('student:exam_result', pk)
+    else:
+        formset = TakeExamFormSet(question=question)
+
+    return render(request, 'student/exam/take_exam_form.html', {
+        'take_tma': True,
+        'exam': exam,
+        'question': question,
+        'formset': formset,
+        'answered_questions': total_questions - total_unanswered_questions,
+        'total_questions': total_questions
+    })
+
+
+@method_decorator([login_required, student_required], name='dispatch')
+class ExamResultView(View):
+    pass
 
 
 @method_decorator([login_required, student_required], name='dispatch')

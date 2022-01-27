@@ -194,9 +194,9 @@
                 <tbody>
                     {% for transaction in deposit_payments %}
                     <tr>
-                        <td class="text-center">{{ transaction.type }}</td>
+                        <td class="">{{ transaction.c_type }}</td>
                         <td class="text-center">{{ transaction.transaction_id }}</td>
-                        <td class="text-center">₦{{ transaction.amount|intcomma }}</td>
+                        <td class="">₦{{ transaction.amount|intcomma }}</td>
                     </tr>
                     {% empty %}
                     <tr>

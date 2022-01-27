@@ -13,17 +13,16 @@
      border-radius:5px;
      background-color: #fff;
     }
-    label { display: none; }
 </style>
 {% endblock %}
 
-{% block head_title %} Assessment - Tma | StudyWare {% endblock %}
+{% block head_title %} Assessment - Exam | StudyWare {% endblock %}
 
 {% block content %}
  <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
-      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tma</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_question' tma.pk %}">{{ tma.course|upper }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:exam_index' %}">Examination</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:exam_questions' exam.pk %}">{{ exam.course|upper }}</a></li>
       <li class="breadcrumb-item active" aria-current="page">Add Question</li>
     </ol>
   </nav>
@@ -48,7 +47,7 @@
                     {% csrf_token %}
                     {{ form|crispy }}
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
-                    <a href="{% url 'lecturer:tma_question' tma.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
+                    <a href="{% url 'lecturer:exam_questions' exam.pk %}" class="btn btn-outline-secondary" role="button">Nevermind</a>
                 </form>
             </div>
         </div>

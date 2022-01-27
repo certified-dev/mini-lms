@@ -2,14 +2,14 @@
 
 {% load static crispy_forms_tags %}
 
-{% block head_title %} Assessment - TMA | StudyWare {% endblock %}
+{% block head_title %} Assessment - Exam | StudyWare {% endblock %}
 
 {% block content %}
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
-      <li class="breadcrumb-item"><a href="{% url 'lecturer:tma_index' %}">Tutor Marked Assesment</a></li>
-      <li class="breadcrumb-item active">{{ tma.title|upper }}</li>
+      <li class="breadcrumb-item"><a href="{% url 'lecturer:exam_index' %}">Examination</a></li>
+      <li class="breadcrumb-item active">{{ exam.course|upper }}</li>
         <li class="breadcrumb-item active">Questions</li>
     </ol>
   </nav>
@@ -29,7 +29,7 @@
           <strong>Actions</strong>
         </div>
         <div class="col-2">
-          <strong>Answers</strong>
+          <strong>Designation</strong>
         </div>
       </div>
     </div>
@@ -41,24 +41,30 @@
               {{ forloop.counter}}
             </div>
             <div class="col-7">
-              <a href="{% url 'lecturer:question_change' tma.pk question.pk %}">{{ question.text }}</a>
+              <a href="{% url 'lecturer:exam_question_change' exam.pk question.pk %}">{{ question.text }}</a>
             </div>
               <div class="col-2">
-           <a href="{% url 'lecturer:question_change' tma.pk question.pk %}" class="btn btn-sm btn-outline-primary" style="border-radius:50px;"><span class="fas fa-pen-alt"></span></a>
+           <a href="{% url 'lecturer:exam_question_change' exam.pk question.pk %}" class="btn btn-sm btn-outline-primary" style="border-radius:50px;"><span class="fas fa-pen-alt"></span></a>
          </div>
             <div class="col-2">
-              {{ question.tma_answers_count }}
+                {% if question.type == "MCQ" %}
+                <div class="badge badge-info">
+                    {% else %}
+                    <div class="badge badge-warning">
+                        {% endif%}
+                        {{ question.type }}
+                    </div>
+                </div>
             </div>
           </div>
-        </div>
-      {% empty %}
+            {% empty %}
         <div class="list-group-item text-center">
-          <p class="text-muted font-italic mb-0">You haven't created any questions yet. Go ahead and <a href="{% url 'lecturer:question_add' tma.pk %}">add the first question</a>.</p>
+          <p class="text-muted font-italic mb-0">You haven't created any questions yet. Go ahead and <a href="{% url 'lecturer:exam_question_add' exam.pk %}">add the first question</a>.</p>
         </div>
       {% endfor %}
     </div>
     <div class="card-footer">
-      <a href="{% url 'lecturer:question_add' tma.pk %}" class="btn btn-primary btn-sm">Add question</a>
+      <a href="{% url 'lecturer:exam_question_add' exam.pk %}" class="btn btn-primary btn-sm">Add question</a>
     </div>
   </div>
   </div>

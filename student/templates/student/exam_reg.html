@@ -16,13 +16,22 @@
           </button>
             </div>
             <div class="modal-body">
+                <p>
+                    {% for exam in student_exams %}
+                    <div class="badge badge-success">{{ exam.course }}</div>
+                    {% endfor %}
+                </p>
                 <form id="exam_form" method="post" novalidate>
                    {% csrf_token %}
                    {{ form|crispy }} 
                 </form>
             </div>
             <div class="modal-footer">
+                {% if exam_to_reg %}
                  <input class="btn btn-success" type="submit" value="Register" form="exam_form">
+                 {% else %}
+                 <input class="btn btn-success" type="submit" value="Register" form="exam_form" disabled>
+                 {% endif %}
             </div>
         </div>
     </div>
@@ -32,43 +41,48 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb mt-4">
       <li class="breadcrumb-item">Assessment</li>
-      <li class="breadcrumb-item active">Exams</li>
+      <li class="breadcrumb-item active">Examination</li>
     </ol>
-  </nav>
+</nav>
 
-  <div class="row mb-2">
+<div class="row mb-2">
     <div class="col">
-        
-        <button id="exam_reg" class="btn btn-primary"><i class="fas fa-plus" style="color:white;"></i> Add</button>
-        
+        <button id="exam_reg" class="btn btn-primary"><i class="fas fa-plus" style="color:white;"></i> Select</button>
      </div>
     <div class="col">
        <div class="badge badge-info float-right"> <h5 class="mb-0">{{ session }}</h5></div>
     </div>
 </div>
 
+<div class="alert alert-info text-center" role="alert"><b>Available Exams</b></div>
     <div class="card mb-0">
         <div class="table-responsive">
             <table class="table mb-0">
                 <thead>
-                <tr>
-                    <th class="small font-weight-bold text-center">SN</th>
-                    <th class="small font-weight-bold text-center">Course</th>
-                    <th class="small font-weight-bold text-center">Title</th>
-                    <th class="small font-weight-bold text-center">Exam Cost</th>
-                </tr>
+                    <tr>
+                        <th class="font-weight-bold text-center">SN</th>
+                        <th class="font-weight-bold text-center">Course</th>
+                        <th class="font-weight-bold text-center">Credit Unit</th>
+                        <th class="font-weight-bold text-center">Status</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {% for exam in user.student.exams.all %}
+                {% for course in student_courses %}
                 <tr>
-                    <td class="text-center small">{{ forloop.counter}}</td>
-                    <td class="text-center small">{{ exam.course.code }}</td>
-                    <td class="text-center small">{{ exam.course.title }}</td>
-                    <td class="text-center small">₦{{ exam.fee|intcomma }}</td>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td class="text-center">{{ course }}</td>
+                    <td class="text-center">{{ course.credit_unit }}</td>
+                    <td class="text-center">
+                        {% for item in student_exams %}
+                        {% if course == item.course %}
+                        <span class="badge badge-success">R</span>
+                       {% endif %}
+                        {% endfor %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td class="bg-light text-center font-italic p-3" colspan="7">you haven't registered any exams yet.</td>
+                    <td class="bg-light text-center font-italic p-3" colspan="7">you haven't registered any courses yet.</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -80,6 +94,6 @@
 {{ user.student.courses.count|json_script:"course_count" }}  
 {{ user.student.semester_registered|json_script:"sem_reg_status" }}
 {{ user.student.wallet_balance|json_script:"wallet_balance" }}
-{{ student_exams|json_script:"exams" }}
+{{ json_exam|json_script:"exams" }}
 
 {% endblock %}
