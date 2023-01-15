@@ -48,6 +48,13 @@
                     {% else %}
                     <td class="text-center small"><span class="fas fa-question"></span></td>
                     {% endif %}
+                    <td class="text-right">
+                        {% if exam.available %}
+                        <a href="{% url 'student:take_exam' exam.pk %}" class="btn btn-outline-primary" style="border-radius:50px; margin-right:100px"><span class="fas fa-pen-alt" ></span></a>
+                        {% else %}
+                        <a href="#" class="btn btn-danger disabled" style="margin-right:90px" role="button"><span class="font-weight-bold">closed</span></a>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>

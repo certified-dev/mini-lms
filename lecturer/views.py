@@ -1,3 +1,4 @@
+import json, requests
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -19,6 +20,7 @@ from lecturer.forms import LecturerSignUpForm, QuestionForm, BaseAnswerInlineFor
 from student.forms import PhotoUploadForm
 from student.models import Student, Tma, Exam, TmaQuestion, TmaAnswer, ExamQuestion, ExamAnswer
 
+api_url = "http://127.0.0.1:7000/api/states"
 
 class PassRequestToFormMixin:
     def get_form_kwargs(self):
@@ -35,6 +37,16 @@ class LecturerSignUpView(CreateView):
 
     def get_context_data(self, **kwargs):
         kwargs['user_type'] = 'lecturer'
+
+        try:
+            response = requests.request("GET", url = api_url, headers={}, data={})
+            data = response.json()
+        except:
+            with open('lecturer\states.json', 'r') as read_file:
+                data = json.load(read_file)
+
+        extra_context = { "states": data }
+        kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form):

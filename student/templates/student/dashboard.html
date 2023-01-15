@@ -31,7 +31,10 @@
         <div class="card">
             <div class="card-header text-center">TMA Countdown</div>
             <div class="text-center mt-5 mb-5">
-            <p><strong>DD-HH-MM-SS</strong></p>
+                <span id="days"></span> D -
+                    <span id="hours"></span> H -
+                    <span id="minutes"></span> M -
+                    <span id="seconds"></span>  S 
             </div>
        </div>
     </div>
@@ -62,6 +65,30 @@
        </div>
     </div>
 </div>
+<script>
+    
+(function () {
+  const second = 1000,
+        minute = second * 60,
+        hour = minute * 60,
+        day = hour * 24;
+
+  let newyear = "Feb 06, 2022 00:00:00",
+      countDown = new Date(newyear).getTime(),
+
+ x = setInterval(function() {
+
+  let now = new Date().getTime(),
+      distance = countDown - now;
+
+     document.getElementById("days").innerText = Math.floor(distance / (day)),
+     document.getElementById("hours").innerText = Math.floor((distance % (day)) / (hour)),
+     document.getElementById("minutes").innerText = Math.floor((distance % (hour)) / (minute)),
+     document.getElementById("seconds").innerText = Math.floor((distance % (minute)) / second);
+    }, 0)
+    }()
+);
+</script>
 
 
 {% endblock %}

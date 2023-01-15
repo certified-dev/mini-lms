@@ -160,6 +160,7 @@ LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'login'
 
+
 # Messages built-in framework
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-secondary',

@@ -320,7 +320,7 @@ $(document).ready(function () {
         text: 'It seems you are not assigned any course.Please contact admin to rectify this issue...',
         icon: 'error',
         showConfirmButton: false,
-        footer: '<a href="/lecturer/dashboard/">Dashboard</a>',
+        footer: '<a href="/lecturer/dashboard">Dashboard</a>',
         backdrop: false
 
       })

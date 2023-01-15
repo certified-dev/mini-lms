@@ -147,8 +147,20 @@
 	</aside>
 </div>
 </div>
+{{ states |json_script:"states" }}
+
 <script type="text/javascript" src="{% static 'assets/vendor/jquery3/jquery.min.js' %}"></script>
   <script>
+	$(document).ready(function () {
+		var states = JSON.parse($("#states").text())
+
+		states.forEach(state => {
+			$('#id_birth_place').append(new Option(state.state,state.state));
+		});
+	});
+
+
+		
     $("#id_faculty").change(function () {
       var url = $("#userForm").attr("data-departments-url");
       var facultyId = $(this).val();

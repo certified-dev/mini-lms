@@ -12,7 +12,7 @@ from core.models import Course, Faculty, Department, Studycentre, Programme, Pos
 
 from student.models import Student, StudentTmaAnswer, ExamAnswer, Exam, TmaAnswer, StudentExamAnswer
 
-from student.choices import STATES, GENDER, LEVEL
+from student.choices import GENDER, LEVEL
 
 User = get_user_model()
 
@@ -22,7 +22,7 @@ class StudentSignUpForm(UserCreationForm):
     first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     other_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Other name'}))
     last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'placeholder': 'Surname'}))
-    birth_place = forms.ChoiceField(required=True, choices=STATES)
+    birth_place = forms.ChoiceField(required=True)
     sex = forms.ChoiceField(required=True, choices=GENDER)
     birth_date = forms.DateField(required=True, widget=forms.DateInput)
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter email address'}), required=True)

@@ -9,7 +9,7 @@ from django.utils.text import Truncator
 from lecturer.models import Lecturer
 from markdown2 import markdown
 
-from student.choices import STATES, LEVEL
+from student.choices import LEVEL
 
 
 def user_directory_path(instance, filename):
@@ -31,11 +31,15 @@ class Session(models.Model):
     semester = models.OneToOneField(Semester, on_delete=models.CASCADE)
     start_date = models.DateField()
     close_date = models.DateField()
-    exam_start = models.DateField()
-    tma_start = models.DateField()
-    exam_end = models.DateField()
-    tma_end = models.DateField()
     registration_end = models.DateField()
+    tma1_start = models.DateField()
+    tma1_end = models.DateField()
+    tma2_start = models.DateField()
+    tma2_end = models.DateField()
+    tma3_start = models.DateField()
+    tma3_end = models.DateField()
+    exam_start = models.DateField()
+    exam_end = models.DateField()  
     active = models.BooleanField(default=False)
 
     def __str__(self):
@@ -72,7 +76,7 @@ class User(AbstractUser):
     birth_date = models.DateField(null=True)
     address = models.CharField(max_length=100, blank=True)
     birth_place = models.CharField(
-        max_length=50, choices=STATES, default='Unknown')
+        max_length=50, default='Unknown')
     sex = models.CharField(max_length=10, default='------')
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='student_faculty', blank=True,
                                 null=True)
@@ -178,7 +182,7 @@ class Topic(models.Model):
         return self.posts.order_by('-created_at')[:10]
 
     def get_message_as_markdown(self):
-        return mark_safe(markdown(self.message, safe_mode='escape'))
+        return mark_safe(self.message)
 
 
 class Post(models.Model):
@@ -197,4 +201,4 @@ class Post(models.Model):
         return truncated_message.chars(30)
 
     def get_message_as_markdown(self):
-        return mark_safe(markdown(self.message, safe_mode='escape'))
+        return mark_safe(self.message)

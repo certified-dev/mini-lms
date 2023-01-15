@@ -18,7 +18,7 @@
   <div class="card-title py-2 px-3 m-0"><strong>{{ topic.subject|capfirst }}</strong> <small class="text-muted float-right">{{ topic.added_on|naturaltime }}</small></div>
     <div class="card-body pb-2 pt-1">
     
-      <p class="card-text"><div class="container p-0">{{ topic.get_message_as_markdown }}</div></p>
+      <p class="card-text"><div class="container p-0">{{ topic }}</div></p>
       <div class="row">
       <div class="col-2">
          <a href="{% url 'student:reply_topic' topic.pk %}" class="btn btn-primary btn-sm mt-2" role="button">Reply</a>
@@ -38,7 +38,7 @@
         <strong>{{ topic.subject|capfirst }}</strong><small class="text-muted float-right pt-1">{{ topic.added_on|naturaltime }}</small>
       </div>
       <div class="col-12">
-        {{ topic.get_message_as_markdown }}
+        {{ topic }}
       </div>
       <div class="col-12">
          <a href="{% url 'student:reply_topic' topic.pk %}" >Reply</a>

@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
 from datetime import date
+import datetime
+import time
+import requests, json
 
 from core.models import User, Expense, Course, Topic, Post, Session
 from django.contrib import messages
@@ -26,6 +29,7 @@ from student.models import CreditTransaction, DebitTransaction, TmaQuestion, Exa
 # from weasyprint import HTML
 
 RRR_TopUp = 128709876406
+api_url = "http://127.0.0.1:7000/api/states"
 
 
 class PassRequestToFormMixin:
@@ -43,6 +47,16 @@ class StudentSignUpView(CreateView):
 
     def get_context_data(self, **kwargs):
         kwargs['user_type'] = 'student'
+
+        try:
+            response = requests.request("GET", url = api_url, headers={}, data={})
+            data = response.json()
+        except:
+            with open('student\states.json', 'r') as read_file:
+                data = json.load(read_file)
+
+        extra_context = { "states": data }
+        kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
     def form_valid(self, form):
@@ -63,10 +77,27 @@ def dashboard(request):
     student_courses = student.courses.values_list('pk', flat=True)
     taken_tmas = student.tmas.values_list('pk', flat=True)
     tmas = Tma.objects.filter(course__in=student_courses).exclude(pk__in=taken_tmas)
-    session = date.today().month
+    session = date.today()
+    active_sem = Session.objects.get(active=True)
+    tma1_start = active_sem.tma1_start
+    tma1_end = active_sem.tma1_end
+    tma2_start = active_sem.tma2_start
+    tma2_end = active_sem.tma2_end
+    tma3_start = active_sem.tma3_start
+    tma3_end =  active_sem.tma3_end
+
+    const = [[tma1_start, tma1_end], [tma2_start, tma2_end], [tma3_start, tma3_end]]
+    if session >= tma1_start and session < tma2_start:
+        active_tma = tma1_start
+    elif session >= tma2_start and session < tma3_start:
+         active_tma = tma2_start
+    elif session >= tma3_start:
+         active_tma = tma3_start
+
+         
     return render(request, 'student/dashboard.html', {'courses': courses,
                                                       'tmas': tmas,
-                                                      'session': session})
+                                                      'session': session.month})
 
 
 @login_required
@@ -195,9 +226,8 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
             session = "2"
         else:
             session = "1"
-        
+
         reg_courses = user.student.courses.all().values_list('pk', flat=True)
-        
 
         courses = Course.objects.filter(semester__title=session, level=user.student.level,
                                         host_faculty=self.request.user.faculty)
@@ -206,7 +236,6 @@ class CourseRegistrationView(PassRequestToFormMixin, UpdateView):
         student_courses = self.request.user.student.courses.all()
         reg_check = self.request.user.student.courses.aggregate(Sum('credit_unit'))['credit_unit__sum']
         form_stat = courses | others
-
 
         extra_context = {
             'semester_courses': form_stat,
@@ -301,17 +330,8 @@ class TmaListView(ListView):
     ordering = ('course',)
     context_object_name = 'tmas'
     template_name = 'student/tma/tma_list.html'
-
-    def get_queryset(self):
-        student = self.request.user.student
-        student_courses = student.courses.values_list('pk', flat=True)
-        taken_tmas = student.tmas.values_list('pk', flat=True)
-        queryset = Tma.objects.filter(course__in=student_courses) \
-            .exclude(pk__in=taken_tmas) \
-            .annotate(questions_count=Count('tma_questions')) \
-            .filter(questions_count__gt=0)
-        return queryset
-
+    
+    
     def get_context_data(self, **kwargs):
         extra_context = {
             'taken_tmas': self.request.user.student.taken_tmas \
@@ -322,13 +342,25 @@ class TmaListView(ListView):
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
+        
+    def get_queryset(self):
+        student = self.request.user.student
+        student_courses = student.courses.values_list('pk', flat=True)
+        taken_tmas = student.tmas.values_list('pk', flat=True)
+        queryset = Tma.objects.filter(course__in=student_courses) \
+            .exclude(pk__in=taken_tmas) \
+            .annotate(questions_count=Count('tma_questions')) \
+            .filter(questions_count__gt=0)
+        return queryset
+
+
 
 @method_decorator([login_required, student_required], name='dispatch')
 class ExamListView(ListView):
     model = Exam
     ordering = ('created',)
     context_object_name = 'exams'
-    template_name = 'student/exam_list.html'
+    template_name = 'student/exam/exam_list.html'
 
     # def get_queryset(self):
     #     student = self.request.user.student
@@ -347,7 +379,7 @@ class ExamListView(ListView):
             'exam_page': True,
             'session': str(date.today().year) + '/' + active_session.semester.title,
         }
-     
+
         kwargs.update(extra_context)
         return super().get_context_data(**kwargs)
 
@@ -388,24 +420,6 @@ def take_tma(request, pk):
                                             correct_answers=correct_answers,
                                             incorrect_answers=incorrect_answers,
                                             percentage=percentage)
-                    # tma_course = tma.course
-                    # courses = student.courses.all()
-
-                    # if '1' in tma.title:
-                    #     for course in courses:
-                    #         if course == tma_course:
-                    #             course.tma1_done = True
-                    #             course.save()
-                    # elif '2' in tma.title:
-                    #    for course in courses:
-                    #         if course == tma_course:
-                    #             course.tma2_done = True
-                    #             course.save()
-                    # else:
-                    #    for course in courses:
-                    #         if course == tma_course:
-                    #             course.tma3_done = True
-                    #             course.save()
 
                     all_taken_tma = student.taken_tmas.all()
                     recent = all_taken_tma.latest('date')
@@ -480,7 +494,6 @@ class ExamRegistrationView(PassRequestToFormMixin, UpdateView):
     success_url = reverse_lazy('student:exam_pay')
 
     def get_context_data(self, **kwargs):
-        
         student_courses = self.request.user.student.courses.all()
         student_exams = self.request.user.student.exams.all()
         json_exam = student_exams.values_list('pk', flat=True)
@@ -554,7 +567,7 @@ def take_exam(request, pk):
     question = unanswered_questions.first()
 
     if request.method == 'POST':
-        formset= TakeExamFormSet(question=question, data=request.POST)
+        formset = TakeExamFormSet(question=question, data=request.POST)
         if formset.is_valid():
             with transaction.atomic():
                 student_answer = formset.save(commit=False)
@@ -587,7 +600,7 @@ def take_exam(request, pk):
         formset = TakeExamFormSet(question=question)
 
     return render(request, 'student/exam/take_exam_form.html', {
-        'take_tma': True,
+        'take_exam': True,
         'exam': exam,
         'question': question,
         'formset': formset,

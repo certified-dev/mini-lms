@@ -8,7 +8,7 @@ from core.models import Faculty, Course, Topic
 from lecturer.models import Lecturer
 from student.models import Tma, Exam, TmaQuestion, ExamQuestion
 
-from student.choices import GENDER, TYPES, STATES, TMA
+from student.choices import GENDER, TYPES, TMA
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ class LecturerSignUpForm(UserCreationForm):
         attrs={'placeholder': 'Other name'}))
     last_name = forms.CharField(required=True, widget=forms.TextInput(
         attrs={'placeholder': 'Surname '}))
-    birth_place = forms.ChoiceField(required=True, choices=STATES)
+    birth_place = forms.ChoiceField(required=True)
     sex = forms.ChoiceField(required=True, choices=GENDER)
     birth_date = forms.DateField(required=True, widget=forms.DateInput)
     email = forms.EmailField(widget=forms.EmailInput(
